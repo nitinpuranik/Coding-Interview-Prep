@@ -1,0 +1,36 @@
+l-values are objects that have a defined memory address and persist beyond a single expression. r-values are temporary values, do not have a defined memory address and only have expression scope.
+Printf format specifiers:
+%8.2f --> Print upto 2 decimal number precision; print 8 characters total, including the fraction.
+%20s  --> Print a string that is right justified to 20 chars.
+%-20s --> Print a string that is left justified to 20 chars.
+How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args);
+**In C, a negative number is ALWAYS stored as the number's two's complement.**
+char val = -3; printf("%hu\n", val);
+Here, in printf, replace val with the value. There are three different cases here on what to replace val with.
+- If val is signed and the value assigned is negative, then the negative number. (Add the case for out of range negative numbers.)
+- If val is unsigned and the value assigned is negative, then the positive value of the 2's complement of the negative.
+- If value is positive and within the positive range of the datatype, then the actual value.
+- If value is positive but outside the positive range of the type, then find out what value val would have and put that.
+char - %c, signed char - %hhi, %hhd; unsigned char - %hhu, signed short - %hi, %hd; unsigned short - %hu, signed int - %i, %d; unsigned int - %u, signed long - %li, %ld; unsigned long - %lu, signed long long - %lli, %lld; unsigned long long - %llu, short hex - %hx, single byte hex - %hhx.
+How do you print a turning line on a text console? For instance, the in-place turning line on "Waiting for SP...\"?
+static unsigned c = 0x2d5c7c2f (These are the ascii's for \,|,/,-, not necessarily in that order, just lookup an ascii table.)
+To print them in turn, change MSB into LSB for each iteration: printf ("%c\b", c = c << 8 | c >> 24);
+To align a value to the closest lower 4K, AND it with ~FFF. To align it to the closest higher 4K, do the same and add 0x1000. So in conclusion, to align to lower 4K, value & ~(0x1000 - 1). Memcached approach: val += alignment - (val % alignment)
+How do you find the offset of a field in a struct? &(((struct node*)0)->Field) gives you the offset.
+********
+| Unix |
+********
+Regex:
+ls * => List everything.
+ls hello[1234] => List hello1, hello2, hello3 and hello4 if they exist.
+ls hello[1-4] => Same as above.
+ls 'hello*' or ls hello\* => Don't interpret the wildcard.
+alias ll "ls -l"
+Find a file in Unix: find . -name E6413X3.EFI
+Find the header file needed to use a library function (say, exit()): man exit -s 3. See man man for more info. 2 for system call and 3 for C library.
+======================================================
+***OpenSource Projects:
+distcc (C, C++, Python), git (C, Python), libsvm (C++), memcached (small project, C, dive in!)
+libevent (C) - Developed by Niels Provos, lighttpd (small, C)
+Varnish - HTTP accelerator, developed by Poul-Henning Kamp. Written in C.
+HAProxy - The fastest load balancer. Written in C.

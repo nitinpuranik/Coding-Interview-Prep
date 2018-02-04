@@ -1,0 +1,92 @@
+EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS
+
+Typo in SecureBootConfigImpl.c 'Doesnt find the Kek Item!', siganture.
+typedef enum {
+  AuthVarTypePk,
+  AuthVarTypeKek,
+  AuthVarTypePriv,
+  AuthVarTypePayload
+} AUTHVAR_TYPE;
+This enum decides whether or not we are to verify a variable against PK or KEK.
+
+How many variables are we dealing with?
+///
+/// Whether the system is operating in setup mode (1) or not (0).
+/// All other values are reserved. Should be treated as read-only.
+/// Its attribute is BS+RT.
+///
+#define EFI_SETUP_MODE_NAME                         L"SetupMode"
+///
+/// Whether the platform firmware is operating in Secure boot mode (1) or not (0).
+/// All other values are reserved. Should be treated as read-only.
+/// Its attribute is BS+RT.
+///
+#define EFI_SECURE_BOOT_MODE_NAME                   L"SecureBoot"
+#define SECURE_BOOT_MODE_ENABLE           1
+#define SECURE_BOOT_MODE_DISABLE          0
+///
+/// "SecureBootEnable" variable for the Secure Boot feature enable/disable.
+/// This variable is used for allowing a physically present user to disable
+/// Secure Boot via firmware setup without the possession of PKpriv.
+///
+#define EFI_SECURE_BOOT_ENABLE_NAME      L"SecureBootEnable"
+#define SECURE_BOOT_ENABLE               1
+#define SECURE_BOOT_DISABLE              0
+///
+///  "CustomMode" variable for two Secure Boot modes feature: "Custom" and "Standard".
+///  Standard Secure Boot mode is the default mode as UEFI Spec's description.
+///  Custom Secure Boot mode allows for more flexibility as specified in the following:
+///    Can enroll or delete PK without existing PK's private key.
+///    Can enroll or delete KEK without existing PK's private key.
+///    Can enroll or delete signature from DB/DBX without KEK's private key.
+///
+#define EFI_CUSTOM_MODE_NAME          L"CustomMode"
+#define CUSTOM_SECURE_BOOT_MODE       1
+#define STANDARD_SECURE_BOOT_MODE     0
+-------------------------------------------------------------------------------------------------------------------------
+Secure Boot Data Structures:
+#define WIN_CERT_TYPE_PKCS_SIGNED_DATA 0x0002
+#define WIN_CERT_TYPE_EFI_PKCS115 0x0EF0
+#define WIN_CERT_TYPE_EFI_GUID 0x0EF1
+
+WIN_CERT_TYPE_EFI_PKCS115 certificate type maps to the certificate structure WIN_CERTIFICATE_EFI_PKCS1_15.
+WIN_CERT_TYPE_EFI_GUID certificate type maps to the certificate structure WIN_CERTIFICATE_UEFI_GUID.
+WIN_CERT_TYPE_PKCS_SIGNED_DATA certificate type maps to the certificate structure as described in the Authenticode specification.
+
+typedef struct _WIN_CERTIFICATE {
+UINT32 dwLength;
+UINT16 wRevision;
+UINT16 wCertificateType;
+//UINT8 bCertificate[ANYSIZE_ARRAY];
+} WIN_CERTIFICATE;
+
+typedef struct _WIN_CERTIFICATE_EFI_PKCS1_15 {
+WIN_CERTIFICATE Hdr;
+EFI_GUID HashAlgorithm;
+// UINT8 Signature[ANYSIZE_ARRAY];
+} WIN_CERTIFICATE_EFI_PKCS1_15;
+
+typedef struct _WIN_CERTIFICATE_UEFI_GUID {
+WIN_CERTIFICATE Hdr;
+EFI_GUID CertType;
+UINT8 CertData[ANYSIZE_ARRAY];
+} WIN_CERTIFICATE_UEFI_GUID;
+
+Below is the format of the signature database:
+#pragma pack(1)
+typedef struct _EFI_SIGNATURE_DATA {
+EFI_GUID SignatureOwner;
+UINT8 SignatureData[…];
+} EFI_SIGNATURE_DATA;
+
+typedef struct _EFI_SIGNATURE_LIST {
+EFI_GUID SignatureType;
+UINT32 SignatureListSize;
+UINT32 SignatureHeaderSize;
+UINT32 SignatureSize;
+// UINT8 SignatureHeader[SignatureHeaderSize];
+// EFI_SIGNATURE_DATA Signatures[…][SignatureSize];
+} EFI_SIGNATURE_LIST;
+#pragma pack()
+
+The secure boot variable 'db' is made of multiple EFI_SIGNATURE_LIST blobs. EFI_SIGNATURE_LIST is a list of X509 certificates. Each blob of this nature contains the struct header where the field SignatureListSize tells you how big this particular listing is. After the field SignatureSize, the next byte stream contains a generic signature header of size SignatureHeaderSize. This is followed by a collection of signatures, each of size SignatureSize.

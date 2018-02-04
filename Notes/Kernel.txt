@@ -1,0 +1,170 @@
+==================
+General Points  ||
+==================
+Typical components of a kernel:
+- Interrupt handlers to service interrupt requests.
+- Scheduler to share processor time among multiple processes.
+- Memory management system to manage process address space.
+- System services such as networking, interprocess communication.
+
+The system state and memory space is collectively referred to as kernel space.
+
+When an application executes a system call, the kernel is said to be running in process context. An application can also trigger an exception for the kernel to take over and get into process context. These are the only two interfaces to the kernel.
+When the kernel is executing an interrupt handler, the kernel is said to be running in interrupt context. The interrupt context is not associated with any process.
+A processor at any given point in time is in one of the three states - In user space executing user code, in kernel space running in process context, in kernel space in interrupt context.
+
+Linux Kernel version numbering convention:
+Major release.Minor release.Revision.Stable version
+The minor release number also indicates whether the release is stable or developmental. Even number is stable, and odd number is development.
+
+Unique characteristics of the Kernel:
+- The kernel has access to neither the C library nor the standard C headers.
+- The kernel is coded in GNU C.
+- The kernel lacks the memory protection afforded to user-space.
+- The kernel cannot easily execute floating-point operations.
+- The kernel has a small per-process fixed-size stack that varies by architecture..
+- Because the kernel has asynchronous interrupts, is preemptive, and supports SMP, synchronization and concurrency are major concerns within the kernel.
+- Portability is important.
+
+Memory violation in the kernel results in an oops, which is a major kernel error. Kernel memory is not pageable.
+If some interface can only be defined at compile time, modules can't reference these interfaces directly.
+=================================
+Chapter 3: Process Management  ||
+=================================
+A process (a program under execution) has one or more of the below components:
+- Open files.
+- Pending signals.
+- Internal kernel data.
+- Processor state.
+- Memory address space with one or more memory mappings.
+- One or more threads of execution.
+- A data section containing global variables.
+The kernel stores the list of processes in a circular doubly linked list called the task list. Each item in this list is a process descriptor of type struct task_struct, defined in <linux/sched.h>
+Each process stack has struct thread_info at the end of the stack. This struct has a pointer (called 'task') to the process descriptor task_struct.
+A process is exactly in one of the five below states:
+TASK_RUNNING: A process is either running or on a runqueue waiting to run. Such processes are called runnable processes. Only possible state for a user-space process.
+TASK_INTERRUPTIBLE: A process is sleeping (blocked), waiting on a condition. Once the condition is fulfilled or if the process receives a signal, it becomes runnable again.
+TASK_UNINTERRUPTIBLE: Similar to interruptible tasks except that it doesn't become runnable on receiving a signal.
+__TASK_TRACED: Process is being traced by another process, like a debugger, via ptrace.
+__TASK_STOPPED: Process execution has stopped. The task isn't running, nor is it eligible to run. This occurs if the task receives the SIGSTOP, SIGTSTP, SIGTTIN, or SIGTTOU signal.
+
+fork() -> clone() -> do_fork() -> copy_process()
+vfork() has the same effect as fork(), except that the page table entries of the parent process are not copied.
+
+The below flags are usually used to create threads. They specify the resources that are to be shared between threads.
+CLONE_VM : Share the address space.
+CLONE_FS : Share the filesystem resources.
+CLONE_FILES : Share the file descriptors of open files.
+CLONE_SIGHAND : Share the signal handlers.
+clone(CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND, 0);
+For more flags, see the Kernel book, page 35.
+
+TLS - Thread local storage. What is this?
+
+Every thread has a pointer to its address space in the field called mm. Kernel threads don't have an address space. So their mm pointer is NULL. You can get a listing of all kernel threads on your Linux system with 'ps -ef'. Kernel threads can only be created by other kernel threads.
+=================================
+Chapter 4: Process Scheduling  ||
+=================================
+I/O bound processes sleep often. These are very sensitive to latencies. These processes need to be run often.
+Processor bound processes are insensitive to latencies. These need to be run less often but for longer duration everytime.
+The Linux kernel implements two priority ranges: nice values and real-time priority.
+Nice values range from -20 to +19, with a default of zero. Larger the value, lesser the priority.
+Real-time priority ranges from 0 to 99, inclusive. Larger the value, larger is the priority.
+You can see a list of processes and their respective nice values (the column NI) with the command ps -el.
+CFS - Completely Fair Scheduler.
+Linux's timeslice is not an absolute value. Linux assigns a proportion of the processor to each process instead of an absolute timeslice value.
+The proportion of processor time that any process receives is determined only by the relative differences in the niceness between it and the other runnable processes.
+CFS uses struct sched_entity to keep track of process accounting. This is one of the fields in the process descriptor, struct task_struct, named se.
+A user task preemption occurs when returning to user space from a system call, or when returning to user space from an interrupt handler.
+When the kernel is executing, mostly in process context, Kernel preemption can occur due to one of the following reasons:
+- When an interrupt handler exits, before returning to kernel-space
+- When kernel code becomes preemptible again by releasing all locks.
+- If a task in the kernel explicitly calls schedule()
+- If a task in the kernel blocks (which results in a call to schedule())
+===========================
+Chapter 5: System Calls  ||
+===========================
+TGID - Thread Group ID
+The getpid system call looks like this: asmlinkage long sys_getpid(void). Asmlinkage is a directive to tell the compiler to look only on the stack for this function’s arguments. This is a required modifier for all system calls. All system calls in the kernel start with sys_.
+A system call is invoked by a userspace application by raising an exception, which is a software interrupt. The defined software interrupt on x86 is 128, which is incurred via the int $0x80 instruction. Note that this is the legacy way of doing this.
+=========================
+Chapter 7: Interrupts  ||
+=========================
+Shared interrupts: The same interrupt line that is shared among multiple interrupt handlers.
+IRQF_DISABLED: Disable all interrupts on the local processor while running this interrupt handler, including this interrupt disabled on all processors. This flag is usually not set, since its not good practice.
+Locks are often obtained in conjunction with disabling local (currently active processor) interrupts. The lock provides protection against concurrent access from another processor, while disabling interrupts provides protection against concurrent access from a possible interrupt handler.
+You cannot sleep while in interrupt context.
+You could be in an interrupt context when you are either executing an interrupt handler or a bottom half.
+Interrupt handlers always run with the current interrupt line disabled on all processors. I think this is more of an architectural feature than the software explicitly disabling the interrupt line.
+============================
+Chapter 8: Bottom Halves  ||
+============================
+Bottom halves typically run immediately after interrupt handlers return. The key is that bottom halves run with interrupts enabled and can't sleep.
+There are three main bottom half interfaces: softirqs, tasklets and work queues. Softirqs are statically defined bottom halves that can run simultaneously on any processor, including two softirqs of the same type. Tasklets are dynamically defined. Two different tasklets can run simultaneously but not two of the same type.
+Softirqs are more robust than tasklets. Tasklets are simpler and more flexible. Read more about the two on page 136.
+A softirq never preempts another softirq. Only an interrupt handler(top half) can preempt a softirq. Another softirq, even the same one can run on another processor, however.
+Marking a softirq for deferred execution is called "raising a softirq".
+Below is the sequence of events:
+- A softirq handler is added to the enum list.
+- The softirq handler is then registered via open_softirq().
+- Next, we need to mark it pending(raise it) with a call to raise_softirq().
+- Then the softirq will be executed at the next invocation of do_softirq().
+Softirqs are used for high frequency and highly threaded uses.
+Tasklets are represented by tasklet_struct.
+You only need to save the interrupt state if there's a possibility the interrupts are already disabled when you get to your point of interest. You need to save the state because if you disable interrupts again and then enable them back, then all the interrupts get enabled back, even though they were disabled to begin with. So instead of reenabling all interrupts, you need to restore them to their prior state.
+You can only schedule an enabled tasklet. If a tasklet is disabled, you need to enable it before you can schedule it.
+If you need to defer work that needs to sleep/block, use work queues. If not, stick to softirqs/tasklets. Work queues are schedulable and run in process context.
+Worker threads are represented by the workqueue_struct structure.
+More often, to safely protect shared data, you need obtain a lock and disable bottom halves.
+====================================
+Chapter 9: Kernel Synchronization ||
+====================================
+Some synchronization rules of thumb to follow when writing kernel code can be found on page 169.
+=============================================
+Chapter 10: Kernel Synchronization Methods ||
+=============================================
+The kernel provides two sets of interfaces for atomic operations - one that operates on integers and another that operates on individual bits.
+=================
+Code snippets: ||
+=================
+To iterate over a list:
+struct task_struct *task;
+struct list_head *list;
+
+list_for_each(list, &current->children) {
+  task = list_entry(list, struct task_struct, sibling);
+}
+
+Print constructs:
+KERN_ERR, KERN_INFO
+printk(KERN_INFO "%u\n", val);
+
+Declare an inline function: static inline void wolf(unsigned long tail_size)
+Inline Assembly:
+unsigned int low, high;
+asm volatile("rdtsc" : "=a" (low), "=d" (high));
+/* low and high now contain the lower and upper 32-bits of the 64-bit tsc */
+Branch Annotation:
+if (unlikely(error)) {}  or if (likely(success)) {}
+
+Structures:
+cfs_rq, sched_entity, task_struct, list_head, rq, sched_class, wait queues are represented by wake_queue_head_t, file, fsnotify_group, fsnotify_event, tasklet_struct
+=========
+Errata || Email to the author.
+=========
+Page 26 figure 3.2 : Should be struct thread_info.
+Page 32: primarily statistical information.
+Page 54: Callig.
+Page 70: Footnote 1: There are about 335 system calls are on x86. Extra 'are'.
+Page 72: This table is architecture; 'dependent' missing.
+Page 73: The kernel multiplies the given system call number by four, should be eight.
+Page 145: This creates a tasklet named my_tasklet enabled with "my_tasklet_handler" as its handler.
+Page 147: whenever do_softirq() detects an executed kernel thread reactivating itself. (executed softirq?)
+Page 151: executes the func member of the workqueue_struct. (Should be func member of the 'work_struct')
+Page 151: run_workqueue() code snippet doesn't seem to be using the variable 'data'.
+Page 159: Chapters 8 and 9 give the details (Chapters 9 and 10?)
+Page 165: such as arithmetic and comparison, atomically it is ludicrous (comma should be after the word 'atomically')
+Page 167: it is a bug if kernel code is preemptive while it is accessing a shared resource.
+Page 169: Given the proceeding points (preceding points)
+-------
+Page 200: Started on 6/8

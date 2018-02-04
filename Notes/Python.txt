@@ -1,0 +1,114 @@
+https://en.wikibooks.org/wiki/Python_Programming
+http://docs.python.org/tutorial/
+https://docs.python.org/3.5/contents.html
+https://www.python.org/dev/peps/pep-0008/
+========================================================
+Print Statements:
+print('Hello, world!') // Single or double quotes, doesn't matter.
+print ("Hello, " + "world!") // Concatenation.
+print ("bouncy, " * 10) // Prints bouncy, 10 times.
+print (len("Hello, world!")) // 13
+question = "What did you have for lunch?"
+print (question) // What did you have for lunch?
+answer = input()
+print ("You had " + answer + " for lunch.")
+print ("If we add 10 to your number, we get ", plusTen)
+print ("If we add 10 to your number, we get %s" % plusTen)
+print ("If we add 10 and 20 to your number, we get %s and %s" % (plusTen, plusTwenty))
+print ("If we add 10 to your number, we get {0}".format(plusTen))
+
+Typecasting:
+print ("Please give me a number:")
+response = input()
+number = int(response)
+plusTen = number + 10
+print ("If we add 10 to your number, we get " + str(plusTen))
+
+Tips:
+python -tt myscript.py
+This will issue an error if you have mixed spaces and tabs.
+To avoid assign by reference and achieve assign by copy, here's the snippet -
+a = [2, 3, 4, 5]
+b = a[:]
+
+Range:
+for i in range(0,5): print(i) //0,1,2,3,4
+for i in range(0,5,2): print(i) //0,2,4
+for i in range(5,0,-1): print(i) //5,4,3,2,1
+
+Data Types:
+The broad categories of data types are: boolean, numeric, sequences, sets and mapping.
+Numeric: int, long, float, complex.
+Sequences: string, byte, byte array, list, tuple.
+Mappings: dictionary.
+
+Strings: (Immutable)
+var = 'abc'
+'bob'.upper() // BOB
+"Hello, world!"[0] // H
+"Hello, world!"[-1] // !
+"Hello, world!"[3:9] // lo, wo. Note that the brackets are inclusive on the left but exclusive on the right. 3 included, 9 excluded.
+Other slicing examples: https://en.wikibooks.org/wiki/Python_Programming/Sequences
+
+Lists: (Mutable)
+spam = []
+spam = ["bacon", "eggs", 42]
+spam // ['bacon', 'eggs', 42]
+spam[0] // 'bacon'. Negative numbers also accepted.
+len(spam) // 3
+spam[1] = "ketchup"
+spam.append(10) // ['bacon', 'eggs', 42, 10]
+spam[4] = 10 // IndexError: list assignment index out of range
+spam.insert(1, 'and') // ['bacon', 'and', 'eggs', 42, 10]
+del spam[1] // ['bacon', 'eggs', 42, 10]
+Lists can be sliced just like strings.
+List methods: append, insert, remove, sort.
+
+Tuples: (Immutable)
+Tuples are immutable. Use commas just like lists, but no square brackets. You can use parentheses.
+unchanging = ("rocks", 0, "the universe")
+
+Dictionaries:
+Key value pairs that are mutable. Declared using curly braces.
+definitions = {"guava": "a tropical fruit", "python": "a programming language", "the answer": 42}
+definitions["the answer"] // 42
+definitions["guava"] // 'a tropical fruit'
+len(definitions) // 3
+New additions: definitions["new key"] = "new value"
+
+Interpretive commands:
+dir() // list the objects in the current namespace.
+dir(__builtins__) // Names within __builtin__
+type(__builtins__) // Tells you the kind of object __builtin__ is.
+
+File:
+with open("test.txt", "r") as file:
+  for line in file:
+    print line
+# No need for file.close() when you use with.
+
+Classes support two fundamental operations: Attribute references and instantiation.
+Class MyClass:
+  """A simple example class""" // This is a docstring. MyClass.__doc__ returns "A simple example class"
+  i = 1234
+  
+  def f(self):
+    return 'Hello, world'
+// MyClass.i and MyClass.f are valid operations and are called attribute references.
+
+class Complex:
+  def __init__(self, realpart, imagpart):
+    self.r = realpart
+    self.i = imagpart
+
+x = Complex(3.2, 4.5) // Class instantiation.
+x.r, x.i // Note that you can combine multiple Python statements using comma separation.
+
+You can create on-the-fly data members and use them with class instances, without having to declare them in the class definition. For example:
+x = MyClass() // Refer to the definition of MyClass above.
+x.count = 1 // Note that MyClass doesn't define 'count'.
+while x.count < 10:
+  x.count = x.count * 2
+print x.count
+del x.count
+x.f() // Prints 

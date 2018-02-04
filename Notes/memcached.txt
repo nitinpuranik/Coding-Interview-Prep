@@ -1,0 +1,59 @@
+In a line: Memcached is a distributed in-memory object cache used to alleviate database load.
+Memcached can be thought of as many individual caches/slabs, each slab belonging to a slab class. Each slab class has its own set of statistical counters and its own LRU. The memory granularity in memcached is at the chunk level within a slab belonging to a slab class. The LRU is a linked list of chunks belonging to particular slab classes.
+An expiration time of zero for an item means that it never expire.
+Let the self-study branch be based off of the master branch.
+Why is #define MAX_NUMBER_OF_SLAB_CLASSES (63 + 1) defined 63 + 1 instead of 64? Because you have 63 actual slab classes and one slab class (with ID zero) used as a store for reuseable slabs.
+
+Readings Completed:
+https://github.com/memcached/memcached/wiki/UserInternals
+To Read:
+https://github.com/memcached/memcached/wiki/Hardware - Read upto NUMA.
+http://www.cs.cmu.edu/~dga/papers/memc3-nsdi2013.pdf
+https://www.tutorialspoint.com/memcached/index.htm
+
+Data Structures:
+item, item_chunk, lru_pull_tail_return, slab_stats_automove, itemstats_t, thread_stats, item_stats_automove, settings, cache_t, stats, stats_state, slab_rebalance, slab_stats
+
+libevent APIs:
+event_get_version()
+
+Potential contributions: Pending
+memcached.c:Can change sanitycheck function to call event_get_version() only once.
+bipbuffer.h: TODO documentation.
+slabs.c confused out-of-memory errors => confusing out-of-memory errors.
+cache.c object to initialized => to be
+slabs.h documentation on slabs_init => What about the fourth argument?
+slabs.c do_slabs_alloc: else ret = NULL isn't needed since its already initialized to NULL.
+slabs.c do_slabs_alloc: add assert in the beginning: assert(id >= POWER_SMALLEST && id <= power_largest);
+slabs.c do_slabs_alloc: we are returning a pointer to an item. But the item's classid still is zero. Does it change at a later point?
+Replace all occurrences of pthread_mutex_lock to pthread_lock. Same for unlock, trylock and tryunlock.
+items.c lru_pull_tail: Returns number of items remove => removed, attempt to hash item lock the search item => improve the sentence, attempt to lock the above hash for the search item.
+items.c: item_cachedump: id |= COLD_LRU. What are we achieving by marking the id of items to be on the COLD_LRU? Can I remove it?
+
+Potential contributions: Committed locally.
+items.c do_item_alloc_pull => can be changed to a static function.
+items.c item_make_header => comments, 'key' no such parameter.
+items.c ref'ed => referenced.
+
+Questions:
+What the hell is a CAS?
+What is a configure.ac file?
+memcached.h:
+/** Use X macros to avoid iterating over the stats fields during reset and
+ * aggregation. No longer have to add new stats in 3+ places.
+ */
+
+Mutexes:
+slabs_lock: Used while reading/updating slabclass_t parameters.
+slabs_rebalance_lock: Used while rebalancing slabs.
+lru_locks[LARGEST_ID]: Used while modifying LRUs.
+cas_id_lock: Used while modifying the static variable cas_id.
+stats_lock: Used while modifying stats and stats_state, the global state tracking struct.
+stats_sizes_lock
+
+Ground Rules:
+When an item is freed from a slab, do the following:
+ - Modify the item's slabclass_t slots field to point to the next item.
+ - Readjust the item's previous and next pointers.
+ - Decrement the item's slabclass_t sl_curr field.
+ - Set the ITEM_SLABBED flag in the item structure.
