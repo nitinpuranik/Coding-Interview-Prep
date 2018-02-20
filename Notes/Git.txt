@@ -105,8 +105,3 @@ Apart from these above objects, the below objects are the central core of Git.
 - refs: Stores pointers to commit objects in the above database.
 
 Start here: https://git-scm.com/book/en/v2/Git-Internals-Git-References
-
-Questions:
-What is git collapse/git squash?
-Learn to use git push/git pull/git fetch efficiently.
-Learn to get the diffs between two commits efficiently.

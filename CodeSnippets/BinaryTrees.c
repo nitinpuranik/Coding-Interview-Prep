@@ -1,3 +1,15 @@
+/*
+How do you determine the successor of a node in a BST?
+- If the node has a right subtree, then the leftmost child in the right subtree would be the successor.
+- If the node has no right subtree and the node is the left child of its parent, then the parent would be the successor.
+- If the node has no right subtree and the node is the right child of its parent, then the closest ancestor whose left subtree this node resides in would be the successor.
+
+How do you determine the predecessor of a node in a BST?
+- If the node has a left subtree, then the rightmost child in the left subtree would be the predecessor.
+- If the node has no left subtree and the node is the right child of its parent, then the parent would be the predecessor.
+- If the node has no left subtree and the node is the left child of its parent, then the closest ancestor whose right subtree this node resides in would be the predecessor.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
