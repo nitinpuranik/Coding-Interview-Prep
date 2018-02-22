@@ -255,8 +255,8 @@ void AlternatingSplit (Node *source, Node **aRef, Node **bRef) {
     } else {
       MoveNode(bRef, &source);
     }
-		
-		count ^= 1;
+    
+    count ^= 1;
   }
 }
 
