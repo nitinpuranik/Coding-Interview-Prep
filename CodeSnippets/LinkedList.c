@@ -66,21 +66,18 @@ int GetNth(Node *node, int index) {
 }
 
 void DeleteList (Node **node) {
-  Node *curr, *next;
+  Node *temp;
   
   if (node == NULL) {
     return;
   }
   
-  curr = *node;
-  
-  while (curr) {
-    next = curr->next;
-    free (curr);
-    curr = next;
+  while (*node) {
+    temp = *node;
+    *node = (*node)->next;
+    
+    free(temp);
   }
-  
-  *node = NULL;
 }
 
 int Pop (Node **head) {
@@ -204,20 +201,17 @@ void FrontBackSplit (Node *source, Node **frontRef, Node **backRef) {
     return;
   }
   
-  fast = slow = source;
-  *frontRef = source;
+  slow = source;
+  fast = source->next;
   
-  while (fast) {
-    /* If this condition is satisfied, your slow pointer now points to the end of front list. */
-    if (fast->next == NULL || fast->next->next == NULL) {
-      *backRef = slow->next;
-      slow->next = NULL;
-      return; /* Infinite loop without this return statement! */
-    }
-    
-    fast = fast->next->next;
+  while (fast && fast->next) {
     slow = slow->next;
+    fast = fast->next->next;
   }
+  
+  *frontRef = source;
+  *backRef = slow->next;
+  slow->next = NULL;
 }
 
 void RemoveDuplicates (Node *head) {
@@ -248,24 +242,21 @@ void MoveNode (Node **dest, Node **source) {
   *dest = movenode;
 }
 
-#define BIT0 0x1
-
-void AlternatingSplit (Node *source, Node **A, Node **B) {
-  unsigned count = 0;
+void AlternatingSplit (Node *source, Node **aRef, Node **bRef) {
+  int count = 0;
   
-  if (A == NULL || B == NULL) {
+  if (aRef == NULL || bRef == NULL) {
     return;
   }
   
   while (source) {
-    if (count & BIT0) {
-      MoveNode(A, &source);
+    if (count == 0) {
+      MoveNode(aRef, &source);
     } else {
-      MoveNode(B, &source);
+      MoveNode(bRef, &source);
     }
 		
-		count = (count + 1) & BIT0;
-		source = source->next;
+		count ^= 1;
   }
 }
 
