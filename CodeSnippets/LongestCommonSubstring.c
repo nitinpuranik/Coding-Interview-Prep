@@ -7,13 +7,13 @@ void LongestCommonSubstring(const char *s1, const char *s2, size_t len_s1, size_
   unsigned int maxlen = 0;
   unsigned int maxi;
   
-	for (i = 0; i <= len_s1; i++) {
-		t[0][i] = 0;
-	}
-	
-	for (i = 0; i <= len_s2; i++) {
-		t[i][0] = 0;
-	}
+  for (i = 0; i <= len_s1; i++) {
+    t[0][i] = 0;
+  }
+  
+  for (i = 0; i <= len_s2; i++) {
+    t[i][0] = 0;
+  }
   
   for (i = 1; i <= len_s2; i++) {
     for (j = 1; j <= len_s1; j++) {
@@ -26,8 +26,8 @@ void LongestCommonSubstring(const char *s1, const char *s2, size_t len_s1, size_
           maxi = i-1;
         }
       } else {
-				t[i][j] = 0;
-			}
+        t[i][j] = 0;
+      }
     }
   }
   
