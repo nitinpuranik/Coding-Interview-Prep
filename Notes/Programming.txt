@@ -30,7 +30,6 @@ Find a file in Unix: find . -name E6413X3.EFI
 Find the header file needed to use a library function (say, exit()): man exit -s 3. See man man for more info. 2 for system call and 3 for C library.
 ======================================================
 ***OpenSource Projects:
-distcc (C, C++, Python), git (C, Python), libsvm (C++), memcached (small project, C, dive in!)
+libsvm (C++), memcached (small project, C, dive in!)
 libevent (C) - Developed by Niels Provos, lighttpd (small, C)
-Varnish - HTTP accelerator, developed by Poul-Henning Kamp. Written in C.
 HAProxy - The fastest load balancer. Written in C.

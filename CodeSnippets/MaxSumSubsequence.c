@@ -6,14 +6,14 @@ void MaxContiguousSubsequence(int *arr, size_t size) {
   unsigned int startindex, endindex;
   unsigned int i,j;
   int currsum, maxsum;
-  
+
   if (arr == NULL) {
     return;
   }
 
   maxsum = arr[0];
   startindex = endindex = 0;
-  
+
   // Compute the sum of each subarray starting from index zero. Inefficient as there is
   // a lot of repeat summation. However, if you can't afford sparing additional space,
   // go with this approach, trading off speed for space savings.
@@ -30,54 +30,52 @@ void MaxContiguousSubsequence(int *arr, size_t size) {
       }
     }
   }
-  
+
   printf("Max consecutive sum = %d.\n", maxsum);
   printf("Occurs between indexes %u and %u.\n", startindex, endindex);
 }
 
 // MaxContiguousSubsequenceDynamic() is a dynamic programming way of computing the maximum contiguous subsequence.
 // This is faster and is O(n) in time complexity but it does need auxiliary storage on the order of O(n).
-void MaxContiguousSubsequenceDynamic (int *arr, size_t size) {
+void MaxContiguousSubsequenceDynamic (int *arr, int size) {
   int maxsum;
   int s[size];
   unsigned int i;
   unsigned int startindex, endindex;
-  
+
   if (arr == NULL || size <= 0) {
     return;
   }
 
-  s[0] = arr[0];
-  maxsum = s[0];
+  maxsum = s[0] = arr[0];
   startindex = endindex = 0;
-  
+
   for (i = 1; i < size; i++) {
-    if (arr[i] > s[i - 1] + arr[i]) {
-      s[i] = arr[i];
-      
-      if (s[i] > maxsum) {
-        maxsum = s[i];
-        startindex = endindex = i;
-      }
-    } else {
+    if (s[i - 1] + arr[i] > arr[i]) {
       s[i] = s[i - 1] + arr[i];
-      
-      if (s[i] > maxsum) {
-        maxsum = s[i];
-        endindex = i;
+    } else {
+      s[i] = arr[i];
+    }
+
+    if (s[i] > maxsum) {
+      maxsum = s[i];
+      endindex = i;
+
+      if (s[i] == arr[i]) {
+        startindex = i;
       }
     }
   }
-  
+
   printf("Max consecutive sum = %d.\n", maxsum);
   printf("Occurs between indexes %u and %u.\n", startindex, endindex);
 }
 
 int main() {
   int arr[] = {-2, -3, 4, -1, -2, 1, 5, -3};
-  
+
   MaxContiguousSubsequence(arr, sizeof(arr)/sizeof(int));
-	MaxContiguousSubsequenceDynamic(arr, sizeof(arr)/sizeof(int));
-  
+  MaxContiguousSubsequenceDynamic(arr, sizeof(arr)/sizeof(int));
+
   return 0;
 }
