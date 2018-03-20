@@ -18,7 +18,7 @@ void heapify (int *arr, int n, int i) {
   lchild = 2 * i + 1;
   rchild = 2 * i + 2;
 
-	// Get the largest item among root, left child and right child.
+  // Get the largest item among root, left child and right child.
   if (lchild < n && arr[largest] < arr[lchild]) {
     largest = lchild;
   }
@@ -30,7 +30,7 @@ void heapify (int *arr, int n, int i) {
   if (largest != i) {
     swap (arr, i, largest);
 
-		// You heapified the root at index i. Now heapify down.
+    // You heapified the root at index i. Now heapify down.
     heapify (arr, n, largest);
   }
 }
@@ -42,23 +42,23 @@ void heapsort (int *arr, int n) {
     return;
   }
 
-	// Build the initial MaxHeap. i = (n / 2) - 1 because the index of the first
-	// non-leaf node in the complete binary tree begins there. Start at the first
-	// non-leaf index and begin heapifying down as you go along to the root.
+  // Build the initial MaxHeap. i = (n / 2) - 1 because the index of the first
+  // non-leaf node in the complete binary tree begins there. Start at the first
+  // non-leaf index and begin heapifying down as you go along to the root.
   for (i = n / 2 - 1; i >= 0; i--) {
     heapify (arr, n, i);
   }
 
-	// Now that you've built your initial MaxHeap, you can find the max item at the
-	// root of the tree. Swap it with the last item and be done with it. Heapify at
-	// the root which now has a new element. Rinse and repeat till i > 0. Note that
-	// i > 0 is sufficient and i >= 0 is not necessary, since you would be done with
-	// sorting at i = 1.
+  // Now that you've built your initial MaxHeap, you can find the max item at the
+  // root of the tree. Swap it with the last item and be done with it. Heapify at
+  // the root which now has a new element. Rinse and repeat till i > 0. Note that
+  // i > 0 is sufficient and i >= 0 is not necessary, since you would be done with
+  // sorting at i = 1.
   for (i = n - 1; i > 0; i--) {
     swap (arr, 0, i);
 
-		// By passing in 'i' for the array size, you are gradually dealing with the array
-		// that gets smaller and smaller, starting with n - 1, n - 2, ...., 1.
+    // By passing in 'i' for the array size, you are gradually dealing with the array
+    // that gets smaller and smaller, starting with n - 1, n - 2, ...., 1.
     heapify (arr, i, 0);
   }
 }
