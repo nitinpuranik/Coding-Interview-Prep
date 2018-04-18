@@ -1,5 +1,5 @@
 /*
-How do you determine the successor of a node in a BST?
+How do you determine the successor of a node in a BST? See implementation of Successor later in the document.
 - If the node has a right subtree, then the leftmost child in the right subtree would be the successor.
 - If the node has no right subtree and the node is the left child of its parent, then the parent would be the successor.
 - If the node has no right subtree and the node is the right child of its parent, then the closest ancestor whose left subtree this node resides in would be the successor.
@@ -297,6 +297,34 @@ bool IsBalanced (Node *node) {
   return   (diff <= 1)              &&
            IsBalanced (node->left)  &&
            IsBalanced (node->right);
+}
+
+Node* Successor (Node *node) {
+  if (node == NULL) {
+    return NULL;
+  }
+  
+  // Has a right subtree. Return leftmost child.
+  if (node->right) {
+    Node *child = node->right;
+    
+    while (child->left) {
+      child = child->left;
+    }
+    
+    return child;
+  }
+  
+  // No right subtree. If node is left child of parent, return parent.
+  if (node->parent && node->parent->left == node) {
+    return node->parent;
+  }
+  
+  while (node->parent && node->parent->right == node) {
+    node = node->parent;
+  }
+  
+  return node->parent;
 }
 
 int main(int argc, char **argv)

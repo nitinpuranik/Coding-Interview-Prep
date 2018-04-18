@@ -33,3 +33,6 @@ Find the header file needed to use a library function (say, exit()): man exit -s
 libsvm (C++), memcached (small project, C, dive in!)
 libevent (C) - Developed by Niels Provos, lighttpd (small, C)
 HAProxy - The fastest load balancer. Written in C.
+======================================================
+C++:
+How do you create a class and still prohibit people from creating instance of the class? By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
