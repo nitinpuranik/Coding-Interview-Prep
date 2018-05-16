@@ -3,6 +3,7 @@ Printf format specifiers:
 %8.2f --> Print upto 2 decimal number precision; print 8 characters total, including the fraction.
 %20s  --> Print a string that is right justified to 20 chars.
 %-20s --> Print a string that is left justified to 20 chars.
+%08x  --> Print a hex with eight nibbles. Pad with leading zeroes if necessary.
 How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args);
 **In C, a negative number is ALWAYS stored as the number's two's complement.**
 char val = -3; printf("%hu\n", val);
