@@ -143,7 +143,7 @@ int MinValue (Node *node) {
 
 bool hasPathSum(Node *node, int sum) {
   if (node == NULL) {
-    return sum == 0 ?  true : false;
+    return sum == 0;
   }
 
   return hasPathSum(node->left, sum - node->data) ||
