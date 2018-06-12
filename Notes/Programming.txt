@@ -5,7 +5,6 @@ Printf format specifiers:
 %-20s --> Print a string that is left justified to 20 chars.
 %08x  --> Print a hex with eight nibbles. Pad with leading zeroes if necessary.
 How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args);
-**In C, a negative number is ALWAYS stored as the number's two's complement.**
 char val = -3; printf("%hu\n", val);
 Here, in printf, replace val with the value. There are three different cases here on what to replace val with.
 - If val is signed and the value assigned is negative, then the negative number. (Add the case for out of range negative numbers.)
@@ -14,7 +13,7 @@ Here, in printf, replace val with the value. There are three different cases her
 - If value is positive but outside the positive range of the type, then find out what value val would have and put that.
 char - %c, signed char - %hhi, %hhd; unsigned char - %hhu, signed short - %hi, %hd; unsigned short - %hu, signed int - %i, %d; unsigned int - %u, signed long - %li, %ld; unsigned long - %lu, signed long long - %lli, %lld; unsigned long long - %llu, short hex - %hx, single byte hex - %hhx.
 How do you print a turning line on a text console? For instance, the in-place turning line on "Waiting for SP...\"?
-static unsigned c = 0x2d5c7c2f (These are the ascii's for \,|,/,-, not necessarily in that order, just lookup an ascii table.)
+unsigned c = 0x2d5c7c2f (These are the ascii's for \,|,/,-, not necessarily in that order, just lookup an ascii table.)
 To print them in turn, change MSB into LSB for each iteration: printf ("%c\b", c = c << 8 | c >> 24);
 To align a value to the closest lower 4K, AND it with ~FFF. To align it to the closest higher 4K, do the same and add 0x1000. So in conclusion, to align to lower 4K, value & ~(0x1000 - 1). Memcached approach: val += alignment - (val % alignment)
 How do you find the offset of a field in a struct? &(((struct node*)0)->Field) gives you the offset.
