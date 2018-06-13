@@ -10,13 +10,13 @@ How do you determine the predecessor of a node in a BST?
 - If the node has no left subtree and the node is the left child of its parent, then the closest ancestor whose right subtree this node resides in would be the predecessor.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
+#include <iostream>
+#include <vector>
+using namespace std;
 
 /*
  * In a BST, nodes in left subtree <= parent.
- * Nodes in right subtree >= parent.
+ * Nodes in right subtree > parent.
  */
 
 typedef struct node {
@@ -25,74 +25,64 @@ typedef struct node {
   struct node *right;
 } Node;
 
-/********************************************************************************
-Practice Area
-********************************************************************************/
-
-void Insert (Node **root, int data) {
-  Node *curr, *prev;
-  Node *newnode = NULL;
-
-  if (root == NULL) {
+void Insert (Node **node, int data) {
+  if (node == nullptr)
     return;
-  }
 
-  newnode = (Node*) malloc (sizeof(Node));
+  Node *newnode = new Node;
+  if (newnode == nullptr)
+    return;
+
   newnode->data = data;
-  newnode->left = newnode->right = NULL;
+  newnode->left = newnode->right = nullptr;
 
-  prev = curr = *root;
+  Node *curr, *prev;
+
+  curr = *node;
+  prev = nullptr;
 
   while (curr) {
     prev = curr;
-    if (data <= curr->data) {
+    if (data <= curr->data)
       curr = curr->left;
-    } else {
+    else
       curr = curr->right;
-    }
   }
 
   if (prev) {
-    if (data <= prev->data) {
+    if (data <= prev->data)
       prev->left = newnode;
-    } else {
+    else
       prev->right = newnode;
-    }
   } else {
-    *root = newnode;
+    *node = newnode;
   }
 }
 
-void InsertRecursiveWorker(Node *curr, Node *parent, Node *newnode) {
-  if (!curr) {
-    if (newnode->data <= parent->data) {
-      parent->left = newnode;
-    } else {
-      parent->right = newnode;
-    }
-  } else if (newnode->data <= curr->data) {
-    InsertRecursiveWorker(curr->left, curr, newnode);
-  } else {
-    InsertRecursiveWorker(curr->right, curr, newnode);
-  }
-}
+/*Bloomberg: Copy a graph. Watch out for the cycle between 1 and 2.
+    0
+   / \
+  1---2
+     / \
+    3   4 */
+Node* Duplicate (Node *node) {
+  static unordered_map<Node*, Node*> visited;
 
-void InsertRecursive (Node **root, int data) {
-  Node *newnode;
+  if (node == nullptr)
+    return nullptr;
 
-  if (!root) {
-    return;
-  }
+  if (visited.find (node) != visited.end())
+    return visited[node];
 
-  newnode = (Node*) malloc (sizeof (Node));
-  newnode->data = data;
-  newnode->left = newnode->right = NULL;
+  Node *newnode = new Node;
+  newnode->data = node->data;
 
-  if (!*root) {
-    *root = newnode;
-  } else {
-    InsertRecursiveWorker(*root, NULL, newnode);
-  }
+  newnode->left  = Duplicate (node->left);
+  newnode->right = Duplicate (node->right);
+
+  visited.insert({node, newnode});
+
+  return newnode;
 }
 
 void Print(Node *node) {
@@ -101,7 +91,7 @@ void Print(Node *node) {
   }
 
   Print(node->left);
-  printf("%d ", node->data);
+  cout << node->data << ' ';
   Print(node->right);
 }
 
@@ -109,7 +99,7 @@ unsigned int MaxDepth(Node *node) {
   unsigned int ldepth;
   unsigned int rdepth;
 
-  if (node == NULL)
+  if (node == nullptr)
     return 0;
 
   ldepth = MaxDepth(node->left);
@@ -122,7 +112,7 @@ unsigned int MaxDepth(Node *node) {
 }
 
 unsigned int Count(Node *node) {
-  if (node == NULL) {
+  if (node == nullptr) {
     return 0;
   }
 
@@ -130,64 +120,65 @@ unsigned int Count(Node *node) {
 }
 
 int MinValue (Node *node) {
-  if (node == NULL) {
+  if (node == nullptr) {
     return 0xdeadbeef;
   }
 
-  if (node->left == NULL) {
+  if (node->left == nullptr) {
     return node->data;
   }
 
   return MinValue(node->left);
 }
 
+/* This is slightly tricky. Check your implementation for the below tree and sum 8.
+    5
+   / \
+  3   7
+ /     \
+1       9
+ \
+  2*/
 bool hasPathSum(Node *node, int sum) {
-  if (node == NULL) {
-    return sum == 0;
-  }
+  if (node == nullptr) {
+		return false;
+	}
 
-  return hasPathSum(node->left, sum - node->data) ||
-         hasPathSum(node->right, sum - node->data);
-}
+	if (node->left == nullptr && node->right == nullptr) {
+		return sum == node->data;
+	}
 
-void PrintPathsWorker(Node *node, int *patharray, unsigned index) {
-  unsigned count;
-
-  if (node == NULL) {
-    return;
-  }
-
-  patharray[index] = node->data;
-
-  if (node->left == NULL && node->right == NULL) {
-    for (count = 0; count <= index; count++) {
-      printf("%d ", patharray[count]);
-    }
-    printf("\n");
-  } else {
-    PrintPathsWorker(node->left, patharray, index + 1);
-    PrintPathsWorker(node->right, patharray, index + 1);
-  }
+	return hasPathSum(node->left, sum - node->data) ||
+	       hasPathSum(node->right, sum - node->data);
 }
 
 void PrintPaths (Node *node) {
-  int *patharray;
-  unsigned maxdepth;
+  static vector<int> arr;
 
-  if (node == NULL) {
-    return;
-  }
+	if (node == nullptr)
+		return;
 
-  maxdepth = MaxDepth(node);
-  patharray = (int*) malloc (maxdepth * sizeof(int));
+	arr.push_back(node->data);
 
-  PrintPathsWorker(node, patharray, 0);
+	if (node->left == NULL && node->right == NULL) {
+
+		for (unsigned i = 0; i < arr.size(); i++) {
+			cout << arr[i] << ' ';
+		}
+		cout << endl;
+
+	} else {
+		PrintPaths (node->left);
+		PrintPaths (node->right);
+	}
+
+	arr.pop_back();
 }
 
 void Mirror (Node *node) {
   Node *temp;
 
-  if (node == NULL)
+  if (node == nullptr)
     return;
 
   temp = node->left;
@@ -199,27 +190,25 @@ void Mirror (Node *node) {
 }
 
 void DoubleTree (Node *node) {
-  Node *newnode;
-
-  if (node == NULL)
+  if (node == nullptr)
     return;
-
-  newnode = (Node*) malloc (sizeof(Node));
+  
+  Node *newnode = new Node;
   newnode->data = node->data;
   newnode->left = node->left;
-  newnode->right = NULL;
-
+  newnode->right = nullptr;
+  
   node->left = newnode;
-
-  DoubleTree(newnode->left);
-  DoubleTree(node->right);
+  
+  DoubleTree (newnode->left);
+  DoubleTree (node->right);
 }
 
 bool SameTree (Node *a, Node *b) {
-  if (a == NULL && b == NULL)
+  if (a == nullptr && b == nullptr)
     return true;
 
-  if (a == NULL || b == NULL)
+  if (a == nullptr || b == nullptr)
     return false;
 
   return (a->data == b->data)       &&
@@ -228,7 +217,7 @@ bool SameTree (Node *a, Node *b) {
 }
 
 bool IsBSTWorker(Node *node, int min, int max) {
-  if (node == NULL)
+  if (node == nullptr)
     return true;
 
   if (node->data < min || node->data > max) {
@@ -240,7 +229,7 @@ bool IsBSTWorker(Node *node, int min, int max) {
 }
 
 void MinMaxValues(Node *node, int *min, int *max) {
-  if (node == NULL)
+  if (node == nullptr)
     return;
 
   if (node->data < *min) {
@@ -255,7 +244,7 @@ void MinMaxValues(Node *node, int *min, int *max) {
 
 bool IsBST(Node *node) {
   int min, max;
-  if (node == NULL)
+  if (node == nullptr)
     return true;
 
   min = max = node->data;
@@ -263,8 +252,25 @@ bool IsBST(Node *node) {
   return IsBSTWorker(node, min, max);
 }
 
+bool IsBST (Node *node) {
+  static int lastdata = INT32_MIN;
+  
+  if (node == nullptr)
+    return true;
+  
+  if (false == IsBST (node->left))
+    return false;
+  
+  if (node->data < lastdata)
+    return false;
+  
+  lastdata = node->data;
+  
+  return IsBST (node->right);
+}
+
 void PrintRange (Node *node, int min, int max) {
-  if (node == NULL) {
+  if (node == nullptr) {
     return;
   }
 
@@ -285,7 +291,7 @@ bool IsBalanced (Node *node) {
   unsigned ldepth, rdepth;
   unsigned diff;
 
-  if (node == NULL) {
+  if (node == nullptr) {
     return true;
   }
 
@@ -300,90 +306,44 @@ bool IsBalanced (Node *node) {
 }
 
 Node* Successor (Node *node) {
-  if (node == NULL) {
-    return NULL;
+  if (node == nullptr) {
+    return nullptr;
   }
-  
+
   // Has a right subtree. Return leftmost child.
   if (node->right) {
     Node *child = node->right;
-    
+
     while (child->left) {
       child = child->left;
     }
-    
+
     return child;
   }
-  
+
   // No right subtree. If node is left child of parent, return parent.
   if (node->parent && node->parent->left == node) {
     return node->parent;
   }
-  
+
   while (node->parent && node->parent->right == node) {
     node = node->parent;
   }
-  
+
   return node->parent;
 }
 
 int main(int argc, char **argv)
 {
-  Node nodes[] = {
-    {6, NULL, NULL},  //node 0 = 5
-    {4, NULL, NULL},  //node 1 = 4
-    {7, NULL, NULL},  //node 2 = 8
-    {11, NULL, NULL}, //node 3 = 11
-    {13, NULL, NULL}, //node 4 = 13
-    {4, NULL, NULL},  //node 5 = 4
-    {7, NULL, NULL},  //node 6 = 7
-    {2, NULL, NULL},  //node 7 = 2
-    {1, NULL, NULL},  //node 8 = 1
-  };
+  Node *node = nullptr;
 
-  nodes[0].left = &nodes[1];
-  nodes[0].right = &nodes[2];
-  nodes[1].left = &nodes[3];/*
-  nodes[3].left = &nodes[6];
-  nodes[2].left = &nodes[4];
-  nodes[2].right = &nodes[5];
-  nodes[3].left = &nodes[6];
-  nodes[3].right = &nodes[7];
-  nodes[5].right = &nodes[8];*/
-
-
-  if (IsBalanced(&nodes[0]) == true) {
-    printf("Balanced Tree.\n");
-  } else {
-    printf("Not a balanced Tree.\n");
-  }
-  /*
-  InsertRecursive(&A, 2);
-  InsertRecursive(&A, 4);
-  InsertRecursive(&A, 4);
-  printf("Count = %d.\n", countTrees(3));
-
-  if(SameTree(A,B)) {
-    printf("Same trees.\n");
-  } else {
-    printf("Different trees.\n");
-  }
-
-  if (hasPathSum(&nodes[0], 22) == true) {
-    printf("Has pathsum.\n");
-  } else {
-    printf("No pathsum.\n");
-  }
-  DoubleTree(A);
-  InsertRecursive(&A, 2);
-  InsertRecursive(&A, 8);
-  InsertRecursive(&A, 1);
-  InsertRecursive(&A, 3);
-  PrintPaths(A, arr, 0);
-  Mirror(A);
-  printf("MaxDepth = %u\n", MaxDepth(A));
-  printf("Count = %u\n", Count(A));
-  */
+  Insert (&node, 5);
+  Insert (&node, 7);
+  Insert (&node, 3);
+  Insert (&node, 1);
+  Insert (&node, 9);
+  Insert (&node, 2);
+  Insert (&node, 6);
 
   return 0;
 }
@@ -407,7 +367,7 @@ typedef enum {
 } child;
 
 void Print(Node *tree) {
-  if (tree == NULL) {
+  if (tree == nullptr) {
     return;
   }
 
@@ -417,7 +377,7 @@ void Print(Node *tree) {
 }
 
 Node* InsertTree (Node *current, char data, child LeftOrRight) {
-  Node *newnode = NULL;
+  Node *newnode = nullptr;
   Node *parent = current;
 
   if (LeftOrRight == rightchild) {
@@ -426,7 +386,7 @@ Node* InsertTree (Node *current, char data, child LeftOrRight) {
     do {
       parent = parent->parent;
 
-      if (parent && parent->right == NULL) {
+      if (parent && parent->right == nullptr) {
         break;
       }
     } while (parent);
@@ -435,7 +395,7 @@ Node* InsertTree (Node *current, char data, child LeftOrRight) {
   if (parent) {
     newnode = (Node*) malloc (sizeof(Node));
     newnode->data = data;
-    newnode->left = newnode->right = NULL;
+    newnode->left = newnode->right = nullptr;
     newnode->parent = parent;
 
     if (LeftOrRight == leftchild) {
@@ -452,14 +412,14 @@ bool ExpTree (const char *str) {
   Node *tree;
   Node *current;
 
-  if (str == NULL || *str == 0) {
+  if (str == nullptr || *str == 0) {
     return true;
   }
 
   tree = (Node*) malloc (sizeof(Node));
   tree->data = *str++;
-  tree->left = tree->right = NULL;
-  tree->parent = NULL;
+  tree->left = tree->right = nullptr;
+  tree->parent = nullptr;
 
   current = tree;
 
@@ -482,10 +442,10 @@ bool ExpTree (const char *str) {
 
       // You should never encounter a character that is not a ? or a :
       default:
-        current = NULL;
+        current = nullptr;
     }
 
-    if (current == NULL) {
+    if (current == nullptr) {
       return false;
     }
 
@@ -496,7 +456,7 @@ bool ExpTree (const char *str) {
   // the parent of this node SHOULD have a left child. Check for these two
   // conditions now.
   if (current != tree) {
-    if (current->parent->left == NULL || current->parent->right != current) {
+    if (current->parent->left == nullptr || current->parent->right != current) {
       return false;
     }
   }
