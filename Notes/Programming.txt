@@ -36,3 +36,6 @@ HAProxy - The fastest load balancer. Written in C.
 ======================================================
 C++:
 How do you create a class and still prohibit people from creating instance of the class? By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
+If you need a fixed array of unique items:
+std::array < std::unordered_set<int>, 2 > arr = { std::unordered_set<int> {1,2,2,3}, std::unordered_set<int> {2,2,7,5,5} };
+arr[1].insert(13);
