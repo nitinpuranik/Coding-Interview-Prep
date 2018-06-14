@@ -95,6 +95,38 @@ void Print(Node *node) {
   Print(node->right);
 }
 
+void PrintMaxSumPath (Node *node, int sum) {
+  static vector<int> maxpath;
+
+  if (node == nullptr)
+    return;
+
+  maxpath.push_back(node->data);
+
+  if (node->left == nullptr && node->right == nullptr && sum == node->data) {
+    for (const int item : maxpath)
+      cout << item << ' ';
+    cout << endl;
+  }
+
+  PrintMaxPath (node->left, sum - node->data);
+  PrintMaxPath (node->right, sum - node->data);
+
+  maxpath.pop_back();
+}
+
+int MaxSum (Node *node) {
+  if (node == nullptr)
+    return 0;
+
+  int lsum = MaxSum (node->left);
+  int rsum = MaxSum (node->right);
+
+  return lsum > rsum ? lsum + node->data : rsum + node->data;
+
+	// From the calling function, you can now call PrintMaxSumPath() to print the path.
+}
+
 unsigned int MaxDepth(Node *node) {
   unsigned int ldepth;
   unsigned int rdepth;
@@ -192,14 +224,14 @@ void Mirror (Node *node) {
 void DoubleTree (Node *node) {
   if (node == nullptr)
     return;
-  
+
   Node *newnode = new Node;
   newnode->data = node->data;
   newnode->left = node->left;
   newnode->right = nullptr;
-  
+
   node->left = newnode;
-  
+
   DoubleTree (newnode->left);
   DoubleTree (node->right);
 }
@@ -254,18 +286,18 @@ bool IsBST(Node *node) {
 
 bool IsBST (Node *node) {
   static int lastdata = INT32_MIN;
-  
+
   if (node == nullptr)
     return true;
-  
+
   if (false == IsBST (node->left))
     return false;
-  
+
   if (node->data < lastdata)
     return false;
-  
+
   lastdata = node->data;
-  
+
   return IsBST (node->right);
 }
 

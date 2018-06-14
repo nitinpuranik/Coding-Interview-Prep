@@ -1,32 +1,20 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
 
-bool Foo (char **set, char *target, int items) {
-  int i;
+bool FooWorker (const vector<string>& arr, const string& target, unsigned index) {
+  for (const string& str : arr) {
 
-  if (set == NULL || *set == NULL || target == NULL) {
-    return false;
-  }
+    if (target.size() - index >= str.size()) {
 
-  for (i = 0; i < items; i++) {
+      if (target.find(str, index) == index) {
 
-    if (target[0] == set[i][0]) {
+        if (target.size() - index == str.size())
+          return true;
 
-      if (strlen(target) >= strlen(set[i])) {
-
-        if (strncmp(target, set[i], strlen(set[i])) == 0) {
-
-          if (strlen(target) == strlen(set[i])) {
-            return true;
-          }
-
-          // Important step! If you simply return Foo() instead of checking return value, you will fail.
-          // Note that you need to continue looping if Foo() returns false.
-          if (true == Foo (set, target + strlen(set[i]), items)) {
-            return true;
-          }
-        }
+        if (true == FooWorker (arr, target, index + str.size()))
+          return true;
       }
     }
   }
@@ -34,14 +22,18 @@ bool Foo (char **set, char *target, int items) {
   return false;
 }
 
-int main () {
-  char *set[] = {"ono", "two", "four", "on", "one"};
-  char *target = "fouronone";
+bool Foo(const vector<string>& arr, const string& target) {
+  return FooWorker (arr, target, 0);
+}
 
-  if (true == Foo(set, target, sizeof(set)/sizeof(char*))) {
-    printf("\"%s\" created from set.\n", target);
+int main () {
+  vector<string> arr {"ono", "two", "four", "on", "one"};
+  string target = "fouronone";
+
+  if (true == Foo(arr, target)) {
+    cout << target << " created from set." << endl;
   } else {
-    printf("Can't be created from set.\n");
+    cout << "Can't be created from set." << endl;
   }
 
   return 0;
