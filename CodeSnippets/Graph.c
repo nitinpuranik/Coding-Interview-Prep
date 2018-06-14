@@ -122,7 +122,7 @@ void dfs(graph *g, int u) {
       // function process_edge(), you can check if parent[u] == v and simply return if yes.
       process_edge(g, u, v);
     }
-    
+
     if (state[v] == undiscovered) {
       parent[v] = u;
       dfs(g, v);
@@ -157,6 +157,10 @@ void bfs(graph *g, int start) {
     while(edge) {
       v = edge->y;
 
+			//        1
+      //       / \
+      //      /   \
+      //     2-----3
       /*
        * Convince yourself with the above triangular graph diagram that the edge (u,v) is a
        * new edge only if the node v is not processed or if the graph is a directed graph.
@@ -265,12 +269,12 @@ void Initialize_Graph(graph *g) {
 
 bool AreNeighbors(graph *g, int x, int y) {
   edgenode *edge;
-  
+
   if (g == NULL) {
     printf("Invalid graph.\n");
     return false;
   }
-  
+
   edge = g->edges[x];
 
   while(edge) {
@@ -279,6 +283,166 @@ bool AreNeighbors(graph *g, int x, int y) {
     }
     edge = edge->next;
   }
-  
+
   return false;
+}
+//------------------------------------------------
+// The below implementation is for graphs where the vertex 'u' is not used as an index into the adjacency list.
+#include <iostream>
+#include <vector>
+#include <deque>
+#include <unordered_map>
+#include <set>
+using namespace std;
+
+class Graph {
+  private:
+    unsigned int m_v;
+    unordered_map <int, vector<int> > adj;
+
+  public:
+    Graph (unsigned v = 0) : m_v(v) { }
+
+    void AddEdge (int u, int v, bool directed) {
+      if (adj.find(u) != adj.end())
+        adj[u].push_back(v);
+      else
+        adj.insert({u, vector<int>{v}});
+
+      if (directed == false)
+        AddEdge(v, u, true);
+    }
+
+    void Print() const;
+
+    bool CycleDetected();
+};
+
+bool Graph::CycleDetected () {
+  set<int> discovered;
+  deque <int> q;
+
+  unordered_map<int, vector<int>>::const_iterator it = adj.begin();
+
+  if (it != adj.end()) {
+    discovered.insert(it->first);
+    q.push_back(it->first);
+  }
+
+  while (!q.empty()) {
+    int u = q.front();
+    q.pop_front();
+
+    for (int v : adj[u]) {
+      cout << "u-v : " << u << "-" << v << endl;
+      if (discovered.find(v) != discovered.end()) {
+        cout << "Cycle! " << v << " visited before." << endl;
+        return true;
+      }
+
+      q.push_back(v);
+      discovered.insert(v);
+    }
+  }
+
+  return false;
+}
+
+void Graph::Print() const {
+  unordered_map <int, vector<int>>::const_iterator it = adj.begin();
+
+  while (it != adj.end()) {
+    cout << it->first << ": ";
+
+    for (const int& item : it->second)
+      cout << item << ' ';
+    cout << endl;
+
+    it++;
+  }
+}
+
+int main () {
+  Graph g {3};
+
+  g.AddEdge(58,67,false);
+  g.AddEdge(58,89,false);
+  g.AddEdge(67,89,false);
+
+  g.Print();
+  g.CycleDetected();
+
+  return 0;
+}
+//------------------------------------------------
+// The below implementation is for graphs where you use the vertex 'u' as an index into the adjacency list.
+#include <iostream>
+#include <vector>
+#include <deque>
+using namespace std;
+
+class Graph {
+  private:
+    unsigned int m_v;
+    vector < vector<int> > adj;
+
+  public:
+    Graph (unsigned v = 0) : m_v(v) , adj(m_v) { }
+
+    void AddEdge (int u, int v) {
+      adj[u].push_back(v);
+      adj[v].push_back(u);
+    }
+
+    void Print() const;
+
+    bool CycleDetected();
+};
+
+bool Graph::CycleDetected () {
+  vector <bool> discovered (m_v, false);
+  deque <int> q;
+
+  discovered[0] = true;
+  q.push_back(0);
+
+  while (!q.empty()) {
+    int u = q.front();
+    q.pop_front();
+
+    for (int v : adj[u]) {
+      if (discovered[v]) {
+        cout << "Cycle! " << v << " visited before." << endl;
+        return true;
+      }
+
+      q.push_back(v);
+      discovered[v] = true;
+    }
+  }
+
+  return false;
+}
+
+void Graph::Print() const {
+  for (unsigned i = 0; i < adj.size(); i++) {
+    cout << i << ": ";
+
+    for (const int item : adj[i])
+      cout << item << ' ';
+    cout << endl;
+  }
+}
+
+
+int main () {
+  Graph g {3};
+
+  g.AddEdge(0,1);
+  g.AddEdge(0,2);
+  g.AddEdge(1,2);
+
+  g.CycleDetected();
+
+  return 0;
 }
