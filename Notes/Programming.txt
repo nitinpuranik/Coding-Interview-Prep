@@ -20,6 +20,28 @@ How do you find the offset of a field in a struct? &(((struct node*)0)->Field) g
 ********
 | Unix |
 ********
+
+#include <iostream>
+#include <array>
+#include <unordered_set>
+using namespace std;
+
+int main() {
+  array< unordered_set<int>, 5> arr { unordered_set<int>{2,3,4,5,6},
+                                      unordered_set<int>{2,2,3,3,3,4,4}
+                                    };
+  
+  for (const auto& uset : arr) {
+    for (const auto& item : uset)
+      cout << item << ' ';
+    cout << endl;
+  }
+  
+  return 0;
+}
+
+
+
 Regex:
 ls * => List everything.
 ls hello[1234] => List hello1, hello2, hello3 and hello4 if they exist.
@@ -35,7 +57,65 @@ libevent (C) - Developed by Niels Provos, lighttpd (small, C)
 HAProxy - The fastest load balancer. Written in C.
 ======================================================
 C++:
-How do you create a class and still prohibit people from creating instance of the class? By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
+How do you create a class and still prohibit people from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
 If you need a fixed array of unique items:
 std::array < std::unordered_set<int>, 2 > arr = { std::unordered_set<int> {1,2,2,3}, std::unordered_set<int> {2,2,7,5,5} };
 arr[1].insert(13);
+
+// Snippets showing a few unordered_map (hashmap) operations.
+Snippet 1:
+int main() {
+  unordered_map <int, vector<int>> umap;
+  
+  umap.insert({5, {4,7,1,2}}); // If you don't specify the type of second parameter like in the above unordered_set example, it defaults to vector.
+  
+  unordered_map <int, vector<int>>::iterator it;
+  
+  it = umap.find(5);
+  
+  if (it != umap.end()) {
+    for (const int item : it->second)
+      cout << item << ' ';
+  }
+  
+  return 0;
+}
+
+Snippet 2:
+int main () {
+  unordered_map<int, vector<int>> adj;
+  
+  adj[4].push_back(4);
+  adj[4].push_back(5);
+  adj[4].push_back(6);
+  adj[4].push_back(7);
+  
+  adj[2].push_back(12);
+  adj[2].push_back(9);
+  adj[2].push_back(7);
+  
+  adj[7].push_back(0);
+  adj[7].push_back(2);
+  
+  adj[3].push_back(75);
+  adj[3].push_back(1);
+  adj[3].push_back(1);
+  
+  adj[11].push_back(3);
+  
+  for (const auto& it : adj) {
+    cout << it.first << ": ";
+    for (const auto& item : it.second) // Iterator in the previous example is a pointer. So the '->' operator. Here use the '.' operator.
+      cout << item << ' ';
+    cout << endl;
+  }  
+  
+  return 0;
+}
+
+Output:
+3: 75 1 1
+7: 0 2
+11: 3
+4: 4 5 6 7
+2: 12 9 7
