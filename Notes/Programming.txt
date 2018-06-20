@@ -119,3 +119,13 @@ Output:
 11: 3
 4: 4 5 6 7
 2: 12 9 7
+
+Snippet 3:
+To initialize a dynamic struct:
+typedef struct {
+  int data;
+  struct node *next;
+} Node;
+
+Node *newnode = new Node {4, nullptr};
+int *ptr = new int[4] {1,2,3,4}; // Size parameter '4' is mandatory. If more items provided in the initializer list, you get a build error. If less items, then rest set to zero.
