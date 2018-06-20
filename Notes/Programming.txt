@@ -30,13 +30,13 @@ int main() {
   array< unordered_set<int>, 5> arr { unordered_set<int>{2,3,4,5,6},
                                       unordered_set<int>{2,2,3,3,3,4,4}
                                     };
-  
+
   for (const auto& uset : arr) {
     for (const auto& item : uset)
       cout << item << ' ';
     cout << endl;
   }
-  
+
   return 0;
 }
 
@@ -62,54 +62,51 @@ If you need a fixed array of unique items:
 std::array < std::unordered_set<int>, 2 > arr = { std::unordered_set<int> {1,2,2,3}, std::unordered_set<int> {2,2,7,5,5} };
 arr[1].insert(13);
 
-// Snippets showing a few unordered_map (hashmap) operations.
-Snippet 1:
+# Snippet 1:
 int main() {
   unordered_map <int, vector<int>> umap;
-  
+
   umap.insert({5, {4,7,1,2}}); // If you don't specify the type of second parameter like in the above unordered_set example, it defaults to vector.
-  
-  unordered_map <int, vector<int>>::iterator it;
-  
-  it = umap.find(5);
-  
+
+  unordered_map <int, vector<int>>::iterator it = umap.find(5); // Use auto it = umap.find(5); to reduce verbosity.
+
   if (it != umap.end()) {
     for (const int item : it->second)
       cout << item << ' ';
   }
-  
+
   return 0;
 }
 
-Snippet 2:
+# Snippet 2:
 int main () {
   unordered_map<int, vector<int>> adj;
-  
+
   adj[4].push_back(4);
   adj[4].push_back(5);
   adj[4].push_back(6);
   adj[4].push_back(7);
-  
+
   adj[2].push_back(12);
   adj[2].push_back(9);
   adj[2].push_back(7);
-  
+
   adj[7].push_back(0);
   adj[7].push_back(2);
-  
+
   adj[3].push_back(75);
   adj[3].push_back(1);
   adj[3].push_back(1);
-  
+
   adj[11].push_back(3);
-  
+
   for (const auto& it : adj) {
     cout << it.first << ": ";
     for (const auto& item : it.second) // Iterator in the previous example is a pointer. So the '->' operator. Here use the '.' operator.
       cout << item << ' ';
     cout << endl;
-  }  
-  
+  }
+
   return 0;
 }
 
@@ -120,7 +117,7 @@ Output:
 4: 4 5 6 7
 2: 12 9 7
 
-Snippet 3:
+# Snippet 3:
 To initialize a dynamic struct:
 typedef struct {
   int data;
@@ -129,3 +126,19 @@ typedef struct {
 
 Node *newnode = new Node {4, nullptr};
 int *ptr = new int[4] {1,2,3,4}; // Size parameter '4' is mandatory. If more items provided in the initializer list, you get a build error. If less items, then rest set to zero.
+
+# Snippet 4: To iterate over an unordered_map and remove all elements as you iterate.
+int main() {
+  unordered_map<int, int> umap;
+
+  for (int i = 1; i <= 10; i++)
+    umap[i] = i * 10;
+
+  for (auto it = umap.begin(); it != umap.end();) {
+    cout << it->first << ": " << it->second << endl;
+
+    it = umap.erase(it); // Set 'it' to the item immediately following the erased item.
+  }
+
+  return 0;
+}
