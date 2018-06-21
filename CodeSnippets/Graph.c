@@ -1,11 +1,6 @@
 // BFS applications: Connected components, two coloring (bipartite). Shortest path from root to any node in undirected graph.
 // DFS applications: Connected components, finding cycles, given (x,y) who is an ancestor, how many descendants (exit - entry - 1)/2.
-// Finding cycles: If an edge is a back-edge, we have a cycle. If entry(x) < entry(y) && exit(x) > exit(y), x is an ancestor of y.
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#define MAXV 50
+// If entry(x) < entry(y) && exit(x) > exit(y), x is an ancestor of y.
 
 // Consider our sample triangular graph below.
 //        1
@@ -20,29 +15,11 @@
 // In all, we would have as many such linked lists as there are nodes.
 // Each item in this linked list is represented by 'struct edgenode' below.
 
-typedef struct {
-  int y;                  // Value of the node.
-  int weight;             // Weight of the edge between the originating node and this node.
-  struct edgenode *next;  // Pointer to the next neighboring node of the originating node in the linked list.
-} edgenode_t;
+//ToDo: Implement DFS such that we visit each node and each edge once and only once. This needs visited and processed arrays and previous node. Leaving any one of these out will result in some use-case failing. Try with the below graph. Pay attention to how you get to 5 recursively from 2. You need to process the new edge 5 - 2. Check if 2 is processed, if not then 5 - 2 is a new edge. Process it. As you return from recursive calls, you come to 2 and see the 2 - 5 edge. Check if 5 is processed. Since it is, don't process the edge 2 - 5. This use case doesn't need the previous node. But if you visit 2 from 1 and then look for neighbor 1, then using visited and processed semantics alone won't suffice. You do need the help of 'previous' assistance.
 
-// Here is the data structure that represents a graph.
-typedef struct {
-  edgenode *edges[MAXV + 1];  // An array of pointers to the heads of the linked lists for each node.
-  unsigned degree[MAXV + 1];  // An array to store the degree of each node.
-  unsigned nvertices;         // Total number of vertices.
-  unsigned nedges;            // Total number of edges.
-  bool directed;              // Is the graph directed or undirected.
-} graph_t;
-
-// An alternative definition of the graph structure with less space wastage but more dynamic memory management.
-typedef struct {
-  edgenode_t **adjlist;
-  unsigned int *nodedegree;
-  unsigned int nvertices;
-  unsigned int nedges;
-  bool directed;
-} graph_t;
+1--2--3
+|  |  |
+6  5--4
 
 typedef enum {
   undiscovered,
@@ -90,21 +67,13 @@ state_t state[MAXV + 1];
 unsigned entry[MAXV + 1];
 unsigned exit[MAXV + 1];
 
-/* Initialize routine for DFS. */
-void initialize(graph *g) {
-  int i;
-
-  for (i = 1; i <= g->nvertices; i++) {
-    parent[i] = -1;
-    state[i] = undiscovered;
-  }
-}
-
 // How to check if a graph edge is a tree edge or a back edge?
+// In other words, how to check if a graph has a cycle?
 // Given an edge (u,v), if v is undiscovered, then (u,v) will be
 // a tree edge. If v is discovered AND if parent[u] == v, then (u,v)
 // is still a tree edge. Else it is a back edge, because the discovered node
 // v will be an ancestor in the DFS tree. You can write this code in process_edge.
+// A graph with a back edge is nothing but a graph with a cycle.
 void dfs(graph *g, int u) {
   edgenode *edge;
   int v;
@@ -208,27 +177,6 @@ unsigned Connected_Components (graph *g) {
   return conn;
 }
 
-void insert_edge (graph *g, int x, int y, bool directed) {
-  edgenode *edge;
-
-  if (g == NULL) {
-    return;
-  }
-
-  edge = (edgenode*) malloc (sizeof(edgenode));
-  edge->y = y;
-  edge->weight = 0;
-
-  edge->next = g->edges[x];
-  g->edges[x] = edge;
-
-  g->degree[x]++;
-
-  if (directed == false) {
-    insert_edge (g, y, x, true);
-  }
-}
-
 // Finding the shortest path from the root to any node is one of the things BFS gives us.
 void FindShortest (int start, int end, int *parent) {
   if (start == end || end == -1) {
@@ -236,34 +184,6 @@ void FindShortest (int start, int end, int *parent) {
   } else {
     FindShortest (start, parent[end], parent);
     printf(" --> %d", end);
-  }
-}
-
-void Initialize_Graph(graph *g) {
-  int i;
-
-  if (g == NULL) {
-    return;
-  }
-
-  // Accept user arguments on graph parameters.
-  scanf("Directed: %d\n", &(g->directed));
-  scanf("Num vertices: %d\n", &(g->nvertices));
-  scanf("Num edges: %d\n", &(g->nedges));
-
-  // Initialize the graph to predetermined values.
-  for (i = 1; i <= g->nvertices; i++) {
-    g->edges[i] = NULL;
-    g->degree[i] = 0;
-  }
-
-  // Get the graph's edge layout input from the user.
-  for (i = 0; i < g->nedges; i++) {
-    int x, y;
-    printf("Edge %u:\n", i + 1);
-    scanf("x: %d", &x);
-    scanf("y: %d", &y);
-    insert_edge(g, x, y, g->directed);
   }
 }
 
@@ -289,89 +209,82 @@ bool AreNeighbors(graph *g, int x, int y) {
 //------------------------------------------------
 // The below implementation is for graphs where the vertex 'u' is not used as an index into the adjacency list.
 #include <iostream>
-#include <vector>
-#include <deque>
-#include <unordered_map>
 #include <set>
+#include <vector>
+#include <climits>
+#include <unordered_map>
 using namespace std;
 
 class Graph {
   private:
-    unsigned int m_v;
-    unordered_map <int, vector<int> > adj;
-
+    bool m_directed;
+    unordered_map<int, vector<int>> adj;
+    void _DFS (int u) ;
+  
   public:
-    Graph (unsigned v = 0) : m_v(v) { }
-
-    void AddEdge (int u, int v, bool directed) {
-      if (adj.find(u) != adj.end())
-        adj[u].push_back(v);
-      else
-        adj.insert({u, vector<int>{v}});
-
-      if (directed == false)
-        AddEdge(v, u, true);
+    Graph (bool directed = false) : m_directed (directed) {}
+  
+    void AddEdge (int u, int v) {
+      adj[u].push_back(v);
+      
+      if (m_directed == false)
+        adj[v].push_back(u);
     }
-
-    void Print() const;
-
-    bool CycleDetected();
+  
+    const auto& GetAdjList () {
+      return adj;
+    }
+  
+    void Print ();
+    void DFS ();
 };
 
-bool Graph::CycleDetected () {
-  set<int> discovered;
-  deque <int> q;
-
-  unordered_map<int, vector<int>>::const_iterator it = adj.begin();
-
-  if (it != adj.end()) {
-    discovered.insert(it->first);
-    q.push_back(it->first);
+void Graph::Print() {
+  for (const auto& entry : adj) {
+    cout << entry.first << ": ";
+    
+    for (const int item : entry.second)
+      cout << item << ' ';
+    
+    cout << endl;
   }
-
-  while (!q.empty()) {
-    int u = q.front();
-    q.pop_front();
-
-    for (int v : adj[u]) {
-      cout << "u-v : " << u << "-" << v << endl;
-      if (discovered.find(v) != discovered.end()) {
-        cout << "Cycle! " << v << " visited before." << endl;
-        return true;
-      }
-
-      q.push_back(v);
-      discovered.insert(v);
-    }
-  }
-
-  return false;
 }
 
-void Graph::Print() const {
-  unordered_map <int, vector<int>>::const_iterator it = adj.begin();
-
-  while (it != adj.end()) {
-    cout << it->first << ": ";
-
-    for (const int& item : it->second)
-      cout << item << ' ';
-    cout << endl;
-
-    it++;
+void Graph::_DFS (int u) {
+  static set<int> visited {u};
+  
+  for (const int v : adj[u]) {
+    
+    if (visited.find(v) == visited.end()) {
+      cout << "Visited " << v << endl;
+      
+      visited.insert(v);
+      
+      _DFS (v);
+    }
   }
+}
+
+void Graph::DFS() {
+  int startnode = adj.begin()->first;
+  
+  cout << "Started at " << startnode << endl;
+  
+  _DFS (startnode);
 }
 
 int main () {
-  Graph g {3};
-
-  g.AddEdge(58,67,false);
-  g.AddEdge(58,89,false);
-  g.AddEdge(67,89,false);
-
-  g.Print();
-  g.CycleDetected();
-
+  Graph g;
+  
+  g.AddEdge(1,2);
+  g.AddEdge(2,3);
+  g.AddEdge(3,4);
+  g.AddEdge(4,5);
+  g.AddEdge(5,6);
+  g.AddEdge(6,1);
+  
+  g.DFS();
+  
   return 0;
 }
 //------------------------------------------------
@@ -395,34 +308,7 @@ class Graph {
     }
 
     void Print() const;
-
-    bool CycleDetected();
 };
-
-bool Graph::CycleDetected () {
-  vector <bool> discovered (m_v, false);
-  deque <int> q;
-
-  discovered[0] = true;
-  q.push_back(0);
-
-  while (!q.empty()) {
-    int u = q.front();
-    q.pop_front();
-
-    for (int v : adj[u]) {
-      if (discovered[v]) {
-        cout << "Cycle! " << v << " visited before." << endl;
-        return true;
-      }
-
-      q.push_back(v);
-      discovered[v] = true;
-    }
-  }
-
-  return false;
-}
 
 void Graph::Print() const {
   for (unsigned i = 0; i < adj.size(); i++) {
@@ -433,7 +319,6 @@ void Graph::Print() const {
     cout << endl;
   }
 }
-
 
 int main () {
   Graph g {3};

@@ -82,6 +82,10 @@ int main() {
 int main () {
   unordered_map<int, vector<int>> adj;
 
+  // Note that you can only resort to subscript-based access when the map is not a const object!
+  // const unordered_map<int, vector<int>>& adj_const = adj;
+  // const vector<int> vec = adj_const[4] leads to a build error. Replace adj_const with the non-const adj and things work.
+  // See snippet 5 for an example.
   adj[4].push_back(4);
   adj[4].push_back(5);
   adj[4].push_back(6);
@@ -140,5 +144,21 @@ int main() {
     it = umap.erase(it); // Set 'it' to the item immediately following the erased item.
   }
 
+  return 0;
+}
+
+# Snippet 5: See the story behind this snippet in snippet 2.
+int main () {
+  unordered_map<int, vector<int>> umap;
+  
+  umap[4] = {40, 50};
+  umap[5] = {50, 60};
+  
+  const auto& umapconst = umap;
+  const auto& it = umapconst.find(4); // Returns iterator.
+  
+  for (int item : it->second) // it->second is the vector {40, 50}.
+    cout << item << ' ';
+  
   return 0;
 }
