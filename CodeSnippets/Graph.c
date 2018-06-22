@@ -219,22 +219,24 @@ class Graph {
   private:
     bool m_directed;
     unordered_map<int, vector<int>> adj;
-    void _DFS (int u) ;
-  
+    void _DFS (int u); // Visits every node once. Doesn't visit all edges.
+    void _DFS (int u, int prev); // Visits every node and edge once.
+    bool _DFS_Cycle (int u, int prev); // Detects if there is a cycle in the graph.
+
   public:
     Graph (bool directed = false) : m_directed (directed) {}
-  
+
     void AddEdge (int u, int v) {
       adj[u].push_back(v);
-      
+
       if (m_directed == false)
         adj[v].push_back(u);
     }
-  
+
     const auto& GetAdjList () {
       return adj;
     }
-  
+
     void Print ();
     void DFS ();
 };
@@ -242,49 +244,107 @@ class Graph {
 void Graph::Print() {
   for (const auto& entry : adj) {
     cout << entry.first << ": ";
-    
+
     for (const int item : entry.second)
       cout << item << ' ';
-    
+
     cout << endl;
   }
 }
 
+// Visits every node once. Doesn't visit all edges.
 void Graph::_DFS (int u) {
   static set<int> visited {u};
-  
+
   for (const int v : adj[u]) {
-    
+
     if (visited.find(v) == visited.end()) {
-      cout << "Visited " << v << endl;
-      
+      cout << "Visited node " << v << endl;
+
       visited.insert(v);
-      
+
       _DFS (v);
     }
   }
 }
 
+// Visits every node and edge once.
+void Graph::_DFS (int u, int prev) {
+  static set<int> visited {u};
+  static set<int> processed;
+
+  for (int v : adj[u]) {
+    if (v != prev) {
+      if (processed.find(v) == processed.end()) {
+        cout << "Processed edge " << u << " - " << v << endl;
+      }
+
+      if (visited.find(v) == visited.end()) {
+        cout << "Visited node " << v << endl;
+
+        visited.insert(v);
+        _DFS (v, u);
+      }
+    }
+  }
+
+  processed.insert(u);
+}
+
+// Detects if there is a cycle in the graph.
+bool Graph::_DFS_Cycle (int u, int prev) {
+  static set<int> visited {u};
+
+  for (int v : adj[u]) {
+    if (v != prev) {
+      if (visited.find(v) != visited.end()) {
+        cout << u << " - " << v << " makes a cycle!" << endl;
+        return true;
+      }
+
+      cout << "Visited node " << v << endl;
+      visited.insert(v);
+
+      if (_DFS_Cycle (v, u))
+        return true;
+    }
+  }
+
+  return false;
+}
+
 void Graph::DFS() {
   int startnode = adj.begin()->first;
-  
-  cout << "Started at " << startnode << endl;
-  
+
+  // Call this method if you need to visit all nodes.
+  cout << "Visited node " << startnode << endl;
   _DFS (startnode);
+
+  // Call this method if you need to visit all nodes and edges.
+  cout << endl;
+  cout << "Visited node " << startnode << endl;
+  _DFS (startnode, INT_MIN);
+
+  // Call this method if you need to check for cycles.
+  cout << endl;
+  cout << "Visited node " << startnode << endl;
+  if (_DFS_Cycle (startnode, INT_MIN) == false) {
+    cout << "No cycle." << endl;
+  }
 }
 
 int main () {
   Graph g;
-  
+
   g.AddEdge(1,2);
   g.AddEdge(2,3);
   g.AddEdge(3,4);
   g.AddEdge(4,5);
   g.AddEdge(5,6);
   g.AddEdge(6,1);
-  
+
   g.DFS();
-  
+
   return 0;
 }
 //------------------------------------------------
