@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cstring>
 
+// Without using additional storage. CTCI 1.3
 void RemoveUnique (char *str) {
   if (str == nullptr)
     return;
@@ -20,7 +20,7 @@ void RemoveUnique (char *str) {
         break; // str[i] is not unique. It repeats somewhere in 0 <= j < tail.
     }
 
-    // This means you did not break from the above loop. So str[i] is unique.
+    // j == tail means you did not break from the above loop. So str[i] is unique.
     // Replace tail with it.
     if (j == tail) {
       str[tail] = str[i];
@@ -31,26 +31,56 @@ void RemoveUnique (char *str) {
   str[tail] = 0;
 }
 
-Bool Anagram(const char *a, const char *b) {
-  char asciitable[256];
-  unsigned int count;
+// The above problem with additional storage.
+void RemoveUnique (char *str) {
+  bool table[256] {false};
+  unsigned len;
 
-  if (strlen(a) != strlen(b)) {
+  {
+    char *temp = str;
+    len = 0;
+
+    while (*temp++) len++;
+  }
+
+  if (len < 2)
+    return;
+
+  unsigned tail = 1;
+  unsigned char idx = str[0];
+  table[idx] = true;
+
+  for (unsigned i = 1; i < len; i++) {
+    idx = str[i];
+
+    if (table[idx] == false) {
+      str[tail] = str[i];
+      tail++;
+
+      table[idx] = true;
+    }
+  }
+
+  str[tail] = 0;
+}
+
+// CTCI 1.4
+bool Anagram (string& str1, string& str2) {
+  if (str1.length() != str2.length())
     return false;
+
+  unsigned long hashtable[256] {0};
+
+  for (unsigned i = 0; i < str1.length(); i++) {
+    unsigned char idx = str1[i];
+    hashtable[idx]++;
+
+    idx = str2[i];
+    hashtable[idx]--;
   }
 
-  for (count = 0; count < 256; count++) {
-    asciitable[count] = 0;
-  }
-
-  while(*a && *b) {
-    asciitable[(unsigned char)*a]++;
-    asciitable[(unsigned char)*b]--;
-    a++; b++;
-  }
-
-  for (count = 0; count < 256; count++) {
-    if (asciitable[count] != 0) {
+  for (unsigned long item : hashtable) {
+    if (item > 0) {
       return false;
     }
   }
@@ -58,45 +88,43 @@ Bool Anagram(const char *a, const char *b) {
   return true;
 }
 
-const char* ReplaceSpace(const char *str) {
-  unsigned int numspaces = 0;
-  const char *ptr = str;
-  char *newstring = NULL;
-  char *spacestr = "%20";
-  unsigned int startindex, endindex;
+// CTCI 1.5
+const char* ReplaceSpace (char *str) {
+  unsigned strlen = 0;
+  unsigned spaces = 0;
 
-  while(*ptr) {
-    if (*ptr++ == ' ') {
-      numspaces++;
+  {
+    char *temp = str;
+
+    while (*temp) {
+      strlen++;
+
+      if (*temp++ == ' ')
+        spaces++;
     }
   }
 
-  if (numspaces == 0) {
-    return str;
-  }
+  if (spaces == 0)
+    return nullptr;
 
-  newstring = (char*) malloc(strlen(str) + numspaces * 2);
+  char *newstr = new char[strlen + spaces * 2 + 1];
+  char *temp = newstr;
 
-  if (newstring) {
-    startindex = 0;
-    endindex = 0;
-
-    ptr = str;
-    while(*ptr) {
-      if (*ptr == ' ') {
-        strncat(newstring, str, endindex - startindex);
-        strcat(newstring, spacestr);
-        startindex = endindex = endindex + 1;
-        str = ptr + 1;
-      } else {
-        endindex++;
-      }
-      ptr++;
+  while (*str) {
+    if (*str == ' ') {
+      *temp++ = '%';
+      *temp++ = '2';
+      *temp++ = '0';
+    } else {
+      *temp++ = *str;
     }
-    strcat(newstring, str);
+
+    str++;
   }
 
-  return newstring;
+  *temp = 0;
+
+  return newstr;
 }
 
 void RotateArr(unsigned char foo[][3]) {
