@@ -1,9 +1,5 @@
 l-values are objects that have a defined memory address and persist beyond a single expression. r-values are temporary values, do not have a defined memory address and only have expression scope.
 Printf format specifiers:
-%8.2f --> Print upto 2 decimal number precision; print 8 characters total, including the fraction.
-%20s  --> Print a string that is right justified to 20 chars.
-%-20s --> Print a string that is left justified to 20 chars.
-%08x  --> Print a hex with eight nibbles. Pad with leading zeroes if necessary.
 How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args);
 char val = -3; printf("%hu\n", val);
 Here, in printf, replace val with the value. There are three different cases here on what to replace val with.
@@ -20,28 +16,6 @@ How do you find the offset of a field in a struct? &(((struct node*)0)->Field) g
 ********
 | Unix |
 ********
-
-#include <iostream>
-#include <array>
-#include <unordered_set>
-using namespace std;
-
-int main() {
-  array< unordered_set<int>, 5> arr { unordered_set<int>{2,3,4,5,6},
-                                      unordered_set<int>{2,2,3,3,3,4,4}
-                                    };
-
-  for (const auto& uset : arr) {
-    for (const auto& item : uset)
-      cout << item << ' ';
-    cout << endl;
-  }
-
-  return 0;
-}
-
-
-
 Regex:
 ls * => List everything.
 ls hello[1234] => List hello1, hello2, hello3 and hello4 if they exist.
@@ -50,6 +24,10 @@ ls 'hello*' or ls hello\* => Don't interpret the wildcard.
 alias ll "ls -l"
 Find a file in Unix: find . -name E6413X3.EFI
 Find the header file needed to use a library function (say, exit()): man exit -s 3. See man man for more info. 2 for system call and 3 for C library.
+======================================================
+Commit these to your memory:
+Dictionary operations: Insert(D,x), Search(D,k), Delete(D,x). Optional operations: Min/Max(D), Predecessor/Successor(D,x). Min/Max are priority queue operations.
+Priority Queue: Insert(Q,x), Min/Max(Q), DeleteMin/Max(Q)
 ======================================================
 ***OpenSource Projects:
 libsvm (C++), memcached (small project, C, dive in!)

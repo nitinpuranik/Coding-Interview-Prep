@@ -1,3 +1,5 @@
+// C++ Implementations of problems in 'Cracking the Coding Interview'.
+
 // Pending Problems: 1.6
 
 /*********************************
@@ -311,6 +313,156 @@ int main () {
     cout << n << "th to last element: " << nth->data << endl;
   else
     cout << "Not found." << endl;
+
+  return 0;
+}
+
+// 2.4
+typedef struct node {
+  long data;
+  struct node *next;
+} Node;
+
+Node* InsertTail (Node **root, Node *tail, long data) {
+  if (root == nullptr)
+    return nullptr;
+
+  Node *newnode = new Node;
+  newnode->data = data;
+  newnode->next = nullptr;
+
+  if (*root == nullptr) {
+    *root = newnode;
+    tail = newnode;
+  } else {
+    tail->next = newnode;
+    tail = newnode;
+  }
+
+  return tail;
+}
+
+void Insert (Node **node, long data) {
+  if (node == nullptr)
+    return;
+
+  Node *newnode = new Node;
+  newnode->data = data;
+  newnode->next = *node;
+  *node = newnode;
+}
+
+Node* AddLists (Node *a, Node *b) {
+  Node *SumList = nullptr;
+  long carry = 0;
+
+  while (a && b) {
+    long sum = a->data + b->data + carry;
+
+    Insert (&SumList, sum % 10);
+    carry = sum / 10;
+
+    a = a->next;
+    b = b->next;
+  }
+
+  while (a) {
+    long sum = a->data + carry;
+    Insert (&SumList, sum % 10);
+    carry = sum / 10;
+    a = a->next;
+  }
+
+  while (b) {
+    long sum = b->data + carry;
+    Insert (&SumList, sum % 10);
+    carry = sum / 10;
+    b = b->next;
+  }
+
+  if (carry > 0) {
+    Insert (&SumList, carry);
+  }
+
+  return SumList;
+}
+
+int main() {
+  Node *a = nullptr;
+  Node *b = nullptr;
+  Node *tail = nullptr;
+
+  tail = InsertTail (&a, tail, 9);
+  tail = InsertTail (&a, tail, 9);
+
+  tail = InsertTail (&b, tail, 9);
+  tail = InsertTail (&b, tail, 9);
+  tail = InsertTail (&b, tail, 9);
+  tail = InsertTail (&b, tail, 9);
+
+  Node *SumList = AddLists (a, b);
+
+  while (SumList) {
+    cout << SumList->data << ' ';
+    SumList = SumList->next;
+  }
+
+  return 0;
+}
+
+/*********************************
+* Chapter 3: Stacks and Queues. *
+*********************************/
+// 3.2
+class Stack {
+  private:
+    vector<long> stack;
+    vector<long> trackstack;
+
+  public:
+    void Push (long data) {
+      stack.push_back(data);
+
+      if (trackstack.empty() || data <= trackstack.back()) {
+        trackstack.push_back(data);
+      }
+    }
+
+    long Top () {
+      return stack.back();
+    }
+
+    void Pop () {
+      if (stack.empty())
+        return;
+
+      if (stack.back() == trackstack.back()) {
+        trackstack.pop_back();
+      }
+
+      stack.pop_back();
+    }
+
+    long Min () {
+      return trackstack.back();
+    }
+};
+
+int main() {
+  Stack s;
+
+  //s.Push(0);
+  s.Push(4);
+  s.Push(5);
+  s.Push(7);
+  s.Push(9);
+  s.Push(2);
+  s.Push(3);
+
+  s.Pop();
+  s.Pop();
+  cout << s.Top() << endl;
+  cout << s.Min();
 
   return 0;
 }
