@@ -1,4 +1,3 @@
-l-values are objects that have a defined memory address and persist beyond a single expression. r-values are temporary values, do not have a defined memory address and only have expression scope.
 Printf format specifiers:
 How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args);
 char val = -3; printf("%hu\n", val);
@@ -36,6 +35,9 @@ HAProxy - The fastest load balancer. Written in C.
 ======================================================
 C++:
 How do you create a class and still prohibit people from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
+l-values are objects that have a defined memory address and persist beyond a single expression. r-values are temporary values, do not have a defined memory address and only have expression scope.
+You can bind a const reference to an r-value. You cannot bind a non-const reference to an r-value. You can however, to an l-value. See example below:
+int& val = 5; // Doesn't work. const int& val = 5; // Works.
 If you need a fixed array of unique items:
 std::array < std::unordered_set<int>, 2 > arr = { std::unordered_set<int> {1,2,2,3}, std::unordered_set<int> {2,2,7,5,5} };
 arr[1].insert(13);
