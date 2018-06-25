@@ -1,131 +1,106 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+using namespace std;
 
 typedef struct node {
-  int data;
+  long data;
   struct node *next;
 } Node;
 
-void Print(Node *node) {
+void Print (Node *node) {
   while (node) {
-    printf("%d  ", node->data);
+    cout << node->data << ' ';
     node = node->next;
   }
-  printf("\n");
+
+	cout << endl;
 }
 
-void Insert(Node **head, int data) {
-  Node *node;
-
-  if (head == NULL) {
+void Insert (Node **head, long data) {
+  if (head == nullptr)
     return;
-  };
 
-  node = (Node*) malloc (sizeof(Node));
-
-  if (node == NULL) {
-    return;
-  }
-
-  node->data = data;
-  node->next = *head;
-  *head = node;
+  Node *newnode = new Node;
+  newnode->data = data;
+  newnode->next = *head;
+  *head = newnode;
 }
 
-unsigned Count (Node *node, int data) {
-  unsigned count = 0;
+unsigned int Count (Node *list, long data) {
+  unsigned int count = 0;
 
-  while (node) {
-    if (data == node->data) {
+  while (list) {
+    if (list->data == data)
       count++;
-    }
 
-    node = node->next;
+    list = list->next;
   }
 
   return count;
 }
 
-/*
- * 4 - 7 - 12 - 9
- * For index two, you want node->next running twice. So,
- * you can have it running for index = 2 and 1, but not for zero,
- * because that'll make it run thrice. So, loop while index > 0.
- */
-int GetNth(Node *node, int index) {
-  while (index && node) {
-    index--;
+long GetNth (Node *node, int index) {
+  while (node && index >= 0) {
     node = node->next;
+    index--;
   }
 
-  if (node) {
+  if (node && index == 0) {
     return node->data;
   }
 
-  return -1;
+  cout << "Out of bounds!" << endl;
+  return 0xdeadbeef;
 }
 
 void DeleteList (Node **node) {
-  Node *temp;
-
-  if (node == NULL) {
+  if (node == nullptr)
     return;
-  }
 
   while (*node) {
-    temp = *node;
+    Node *delnode = *node;
     *node = (*node)->next;
 
-    free(temp);
+    delete delnode;
   }
 }
 
-int Pop (Node **head) {
-  int data;
-  Node *delnode;
+long Pop (Node **head) {
+  if (head == nullptr || *head == nullptr)
+    return 0xdeadbeef;
 
-  if (head == NULL || *head == NULL) {
-    return -1;
-  }
+  long data = (*head)->data;
+  Node *node = *head;
 
-  delnode = *head;
   *head = (*head)->next;
-
-  data = delnode->data;
-  free(delnode);
+  delete node;
 
   return data;
 }
 
-void InsertNth(Node **head, int index, int data) {
-  Node *prev, *curr;
-  Node *newnode = NULL;
-
-  if (head == NULL) {
+void Insert (Node **head, long index, long data) {
+  if (head == nullptr || index < 0)
     return;
-  }
 
-  prev = NULL;
+  Node *curr, *prev;
   curr = *head;
+  prev = nullptr;
 
-  while (index && curr) {
+  while (curr && index > 0) {
     prev = curr;
     curr = curr->next;
-
     index--;
   }
 
-  if (index == 0) { /* Curr could either be zero or not. */
-    newnode = (Node*) malloc (sizeof(Node));
+  if (index == 0) {
+    Node *newnode = new Node;
     newnode->data = data;
+    newnode->next = curr;
 
-    if (prev) { /* Middle or end of list. */
+    if (prev) {
       prev->next = newnode;
-    } else { /* Beginning of list. */
+    } else {
       *head = newnode;
     }
-
-    newnode->next = curr;
   }
 }
 
@@ -289,42 +264,35 @@ Node* ShuffleMerge (Node *a, Node *b) {
 }
 
 Node* SortedMerge (Node *a, Node *b) {
-  Node *tailRef;
-  Node *ref;
-
-  if (a == NULL) {
+  if (a == nullptr)
     return b;
-  } else if (b == NULL) {
+  else if (b == nullptr)
     return a;
-  }
 
-  if (a->data < b->data) {
-    ref = tailRef = a;
-    a = a->next;
-  } else {
-    ref = tailRef = b;
-    b = b->next;
-  }
+  Node *prev = nullptr;
+  Node *curr = a->data < b->data ? a : b;
+  Node *other = (curr == b) ? a : b;
 
-  while (a && b) {
-    if (a->data < b->data) {
-      tailRef->next = a;
-      tailRef = a;
-      a = a->next;
+  while (curr && other) {
+    if (curr->data < other->data) {
+      prev = curr;
+      curr = curr->next;
     } else {
-      tailRef->next = b;
-      tailRef = b;
-      b = b->next;
+      Node *nextnode = other->next;
+
+      other->next = curr;
+      prev->next = other;
+
+      curr = other;
+      other = nextnode;
     }
   }
 
-  if (a) {
-    tailRef->next = a;
-  } else {
-    tailRef->next = b;
+  if (other) {
+    prev->next = other;
   }
 
-  return ref;
+  return a->data < b->data ? a : b;
 }
 
 void MergeSort(Node **headRef) {
