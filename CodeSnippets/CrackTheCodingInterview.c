@@ -410,6 +410,34 @@ int main() {
   return 0;
 }
 
+// 2.5
+// See the diagram for problem 2.5. Lets say the loop starts at k steps from the first node. By the time the slow guy takes k steps to get to the start of the loop, the fast guy would have gotten 2k steps ahead. So now in the loop, the fast guy has k steps headstart. With that headstart in a loop of n steps, they meet after the slow guy takes n - k steps, or k steps away from the loop start. Now if you reset the slow guy back to the list head and then move the slow guy and fast guy in single lockstep mode, they meet at the start of the loop after k steps.
+void DetectCycle (Node *node) {
+  Node *slow = node;
+  Node *fast = node;
+
+  while (fast && fast->next) {
+    slow = slow->next;
+    fast = fast->next->next;
+
+    if (slow == fast)
+      break;
+  }
+
+  if (fast && fast->next) {
+    slow = node;
+
+    while (slow != fast) {
+      slow = slow->next;
+      fast = fast->next;
+    }
+
+    cout << "Cycle at " << slow->data;
+  } else {
+    cout << "No cycle";
+  }
+}
+
 /*********************************
 * Chapter 3: Stacks and Queues. *
 *********************************/

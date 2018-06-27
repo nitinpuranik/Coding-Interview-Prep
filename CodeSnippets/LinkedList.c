@@ -283,7 +283,7 @@ Node* SortedMerge (Node *a, Node *b) {
       other->next = curr;
       prev->next = other;
 
-      curr = other;
+      prev = other;
       other = nextnode;
     }
   }
@@ -320,281 +320,64 @@ void Push (Node **headRef, int data) {
   *headRef = newnode;
 }
 
-Node* SortedIntersect (Node *A, Node *B) {
-  Node *sortedlist = NULL;
+Node* SortedIntersect (Node *a, Node *b) {
+  Node *slist = nullptr;
 
-  while (A && B) {
-    if (A->data < B->data) {
-      A = A->next;
-    } else if (A->data > B->data) {
-      B = B->next;
-    } else {
-      Push(&sortedlist, A->data);
-      A = A->next;
-      B = B->next;
-    }
-  }
-
-  if (sortedlist) {
-    MergeSort(&sortedlist);
-  }
-
-  return sortedlist;
-}
-
-void Reverse (Node **headRef) {
-  Node *curr, *newhead;
-
-  if (headRef == NULL || *headRef == NULL) {
-    return;
-  }
-
-  curr = (*headRef)->next;
-  (*headRef)->next = NULL;
-
-  while (curr) {
-    newhead = curr;
-    curr = curr->next;
-
-    newhead->next = *headRef;
-    *headRef = newhead;
-  }
-}
-
-void RecursiveReverseWorker(Node **headRef, Node *curr) {
-  Node *next;
-
-  if (curr) {
-    next = curr->next;
-
-    curr->next = *headRef;
-    *headRef = curr;
-
-    RecursiveReverseWorker(headRef, next);
-  }
-}
-
-void RecursiveReverse (Node **headRef) {
-  Node *curr;
-
-  if (headRef == NULL || *headRef == NULL) {
-    return;
-  }
-
-  curr = (*headRef)->next;
-  (*headRef)->next = NULL; /* This is an important step! Linked List bites its own tail without this. */
-
-  RecursiveReverseWorker(headRef, curr);
-}
-
-void DeleteUnsortedNodes(Node *node) {
-  Node *curr, *prev;
-
-  if (node == NULL || node->next == NULL) {
-    return;
-  }
-
-  while (node && node->next) {
-    prev = node;
-    curr = node->next;
-
-    while(curr) {
-      if (node->data == curr->data) {
-        prev->next = curr->next;
-        free(curr);
-        curr = prev->next;
-      } else {
-        prev = curr;
-        curr = curr->next;
-      }
-    }
-
-    node = node->next;
-  }
-}
-
-int NthToLast(Node *node, unsigned int ntolast) {
-  unsigned int size, idx;
-  Node *curr;
-
-  if (node == NULL) {
-    return -1;
-  }
-
-  /* Count the number of items. */
-  for(curr = node, size = 0; curr; size++, curr = curr->next);
-  if (ntolast > size) {
-    return -1;
-  }
-
-  curr = node;
-  for (idx = 0; idx < size - ntolast; idx++) {
-    curr = curr->next;
-  }
-
-  return curr->data;
-}
-
-/*
-1 - 2 - 3 - 4 - 5
-2nd to last = 4 ; 3 times = 5 - 2
-4th to last = 2 ; 1 time = 5 - 4
-*/
-unsigned int NthToLastRecursiveWorker(Node *node, unsigned int count, int *data) {
-  unsigned int step;
-
-  if (node == NULL) {
-    return 1;
-  }
-
-  step = NthToLastRecursiveWorker(node->next, count, data);
-  if (step == count) {
-    *data = node->data;
-  }
-
-  return step + 1;
-}
-
-int NthToLastRecursive(Node *node, unsigned int count) {
-  int data = -1;
-
-  if (node == NULL) {
-    return -1;
-  }
-
-  NthToLastRecursiveWorker(node, count, &data);
-  return data;
-}
-
-void DeleteNode (Node **headRef, Node *node) {
-  Node *prev, *curr;
-
-  if (headRef == NULL || *headRef == NULL || node == NULL) {
-    return;
-  }
-
-  prev = NULL;
-  curr = *headRef;
-
-  while (curr && curr != node) {
-    prev = curr;
-    curr = curr->next;
-  }
-
-  if (curr) {
-    if (prev) {
-      prev->next = curr->next;
-    } else {
-      *headRef = (*headRef)->next;
-    }
-  }
-
-  /*
-   * Penalize the careless programmer if he passes a pointer
-   * to a node that doesn't even exist in this list by freeing
-   * it mindlessly.
-   */
-  free(node);
-}
-
-// (3 -> 1 -> 5) + (5 -> 9 -> 2)
-Node* CreateList(unsigned int sum) {
-  Node *head, *newnode;
-
-  if (sum < 10) {
-    Node *newlist = (Node*) malloc (sizeof(Node));
-    newlist->data = sum;
-    newlist->next = NULL;
-    return newlist;
-  }
-
-  head = CreateList(sum / 10);
-  newnode = (Node*) malloc (sizeof(Node));
-  newnode->data = sum % 10;
-  newnode->next = head;
-  return newnode;
-}
-
-int LoopNode(Node *node) {
-  Node *slow, *fast;
-
-  slow = node;
-  fast = node;
-
-  while (fast && fast->next) {
-    if (slow == fast)
-      break;
-    slow = slow->next;
-    fast = fast->next->next;
-  }
-
-  slow = node;
-  while (slow != fast) {
-    slow = slow->next;
-    fast = fast->next;
-  }
-
-  return slow->data;
-
-  /* See cracking diagram on page 110. Lets say the loop starts at k steps from start. By the time the slow guy takes k steps to get to the start, the fast guy would have gotten 2k steps ahead. So now in the loop, the fast guy has k steps headstart. With that headstart in a loop of n steps, now they meet after n - k steps, or k steps away from the loop start. Now if you reset the slow guy back to the list head and then move the slow guy and fast guy in single lockstep mode, they meet at the start of the loop after k steps. */
-}
-
-Node* ProcessListSum (Node *a, Node *b) {
-  unsigned int sum = 0;
-  unsigned int degree = 1;
-
-  while (a || b) {
-    if (a) {
-      sum = sum + a->data * degree;
+  while (a && b) {
+    if (a->data < b->data) {
       a = a->next;
     }
-    if (b) {
-      sum = sum + b->data * degree;
+
+    else if (b->data < a->data) {
       b = b->next;
     }
-    degree = degree * 10;
+
+    else {
+      Insert (&slist, a->data);
+      a = a->next;
+      b = b->next;
+    }
   }
 
-  return CreateList(sum);
+  return slist;
 }
 
-int main()
-{
-  Node *A = NULL;
+// Iterative solution.
+void Reverse (Node **head) {
+  if (head == nullptr || *head == nullptr)
+    return;
 
-  Insert(&A, 9);
-  Insert(&A, 8);
-  Insert(&A, 7);
-  Insert(&A, 6);
-  Insert(&A, 5);
-  Insert(&A, 4);
-  Insert(&A, 3);
-  Insert(&A, 2);
+  Node *curr = (*head)->next;
+  (*head)->next = nullptr;
 
-  Print(A);
-  RecursiveReverse(&A);
-  Print(A);
+  while (curr) {
+    Node *nextnode = curr->next;
+    curr->next = *head;
+    *head = curr;
 
-  /*
-  C = ProcessListSum(A, B);
-  Print(C);
-  DeleteNode(&A, A->next->next->next->next);
-  DeleteUnsortedNodes(A);
-  RecursiveReverse(&A);
-  MergeSort(&A);
-  FrontBackSplit(A, &B, &C);
-  ShuffleMergeRec(A, B);
-  AlternatingSplit(head, &A, &B);
-  MoveNode(&A, &B);
-  RemoveDuplicates(head);
-  Append(&First, &Second);
-  Print(First);
-  printf("Popped item: %d\n", Pop(&head));
-  InsertNth(&head, 9, 16);
-  DeleteList(&head);
-  printf("Item at index %d: %d\n", index, GetNth(head, index));
-  printf("%d occurs %d times in this list.\n", searchval, Count(head, searchval));
-  Print(head);
-  */
-  return 0;
+    curr = nextnode;
+  }
+}
+
+// Recursive helper function.
+void __Reverse (Node **head, Node *curr) {
+  if (curr) {
+    Node *nextnode = curr->next;
+
+    curr->next = *head;
+    *head = curr;
+
+    __Reverse (head, nextnode);
+  }
+}
+
+// Recursive solution.
+void Reverse (Node **head) {
+  if (head == nullptr || *head == nullptr)
+    return;
+
+  Node *curr = (*head)->next;
+  (*head)->next = nullptr;
+
+  __Reverse (head, curr);
 }
