@@ -140,3 +140,14 @@ int main () {
   
   return 0;
 }
+
+# Snippet 6
+#include <queue>
+priority_queue<int> pq; // You get a max-heap by default. See below to get a min-heap.
+pq.push(data);
+pq.pop();
+cout << pq.top()
+
+#include <queue>
+#include <functional> // Header for std::greater.
+priority_queue<int, vector<int>, greater<int>> pq; // Gives you a min heap.
