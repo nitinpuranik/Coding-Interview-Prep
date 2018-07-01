@@ -1,10 +1,12 @@
-#include <stdio.h>
+#include <iostream>
+#include <vector>
+using namespace std;
 
-void LongestIncreasingSeq (int *arr, int n) {
-  int currlen, maxlen;
-  int maxind, i;
+void LongestConsecutiveIncreasingSeq (const vector<int>& arr) {
+  unsigned currlen, maxlen;
+  unsigned i, maxind;
 
-  if (arr == NULL || n <= 0) {
+  if (arr.empty()) {
     return;
   }
 
@@ -12,7 +14,7 @@ void LongestIncreasingSeq (int *arr, int n) {
   maxlen = 1;
   maxind = 0;
 
-  for (i = 1; i < n; i++) {
+  for (i = 1; i < arr.size(); i++) {
     if (arr[i] > arr[i - 1]) {
       currlen++;
     } else {
@@ -31,22 +33,22 @@ void LongestIncreasingSeq (int *arr, int n) {
   if (currlen > maxlen) {
     maxlen = currlen;
     maxind = i - 1;
-    currlen = 0;
   }
 
   i = maxind - maxlen + 1;
-  printf("{%d", arr[i++]);
+  cout << "{" << arr[i++];
+
   for (; i <= maxind; i++) {
-    printf(", %d", arr[i]);
+    cout << ", " << arr[i];
   }
 
-  printf("}\n");
+  cout << "}" << endl;
 }
 
 int main () {
-  int arr[] = {2,4,3,5,7,6,9,10,12,8};
+  vector<int> arr {2,4,3,5,7,6,9,10,12,8};
 
-  LongestIncreasingSeq(arr, sizeof(arr)/sizeof(int));
+  LongestConsecutiveIncreasingSeq(arr);
 
   return 0;
 }
