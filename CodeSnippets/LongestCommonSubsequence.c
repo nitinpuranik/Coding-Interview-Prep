@@ -1,56 +1,58 @@
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
+#include <vector>
+using namespace std;
 
-void PrintSeq (const char *s1, const char *s2, unsigned row, unsigned col, unsigned total, unsigned t[][total]) {
-  if (t[row][col]) {
-    if (s1[col - 1] == s2[row - 1]) {
-      PrintSeq (s1, s2, row - 1, col - 1, total, t);
-      printf("%c ", s1[col - 1]);
+void PrintLCS (const string& s1, const string& s2, auto const& tbl, int row, int col) {
+  if (tbl[row][col]) {
+    if (s2[row - 1] == s1[col - 1]) {
+      PrintLCS (s1, s2, tbl, row - 1, col - 1);
+      cout << s2[row - 1];
     } else {
-      if (t[row][col] == t[row - 1][col]) {
-        PrintSeq (s1, s2, row - 1, col, total, t);
-      } else {
-        PrintSeq (s1, s2, row, col - 1, total, t);
-      }
+      if (tbl[row - 1][col] > tbl[row][col - 1])
+        PrintLCS (s1, s2, tbl, row - 1, col);
+      else
+        PrintLCS (s1, s2, tbl, row, col - 1);
     }
   }
 }
 
-// s1 along columns, s2 along rows.
-void LongestCommonSubsequence (const char *s1, const char *s2, size_t len_s1, size_t len_s2) {
-  unsigned t[len_s2 + 1][len_s1 + 1];
-  unsigned i,j;
+// s1 along cols, s2 along rows
+void LCS (const string& s1, const string& s2) {
+  if (s1.empty() || s2.empty()) {
+    cout << "Empty string" << endl;
+    return;
+  }
 
-  // Init table.
-  for (i = 0; i <= len_s1; i++) {
-		t[0][i] = 0;
-	}
+  vector<vector<int>> tbl;
 
-	for (i = 0; i <= len_s2; i++) {
-		t[i][0] = 0;
-	}
+  for (unsigned i = 0; i <= s2.length(); i++)
+    tbl.push_back({0});
 
-  for (i = 1; i <= len_s2; i++) {
-    for (j = 1; j <= len_s1; j++) {
+  for (unsigned i = 1; i <= s1.length(); i++)
+    tbl[0].push_back(0);
+
+  for (unsigned i = 1; i <= s2.length(); i++) {
+    for (unsigned j = 1; j <= s1.length(); j++) {
       if (s2[i - 1] == s1[j - 1]) {
-        t[i][j] = t[i - 1][j - 1] + 1;
+        tbl[i].push_back(tbl[i - 1][j - 1] + 1);
       } else {
-        t[i][j] = t[i - 1][j];
-
-        if (t[i][j - 1] > t[i][j]) {
-          t[i][j] = t[i][j - 1];
-        }
+        int entry = tbl[i - 1][j] > tbl[i][j - 1] ? tbl[i - 1][j] : tbl[i][j - 1];
+        tbl[i].push_back(entry);
       }
     }
   }
 
-  PrintSeq (s1, s2, len_s2, len_s1, len_s1 + 1, t);
+  if (tbl[s2.length()][s1.length()] == 0)
+    cout << "No LCS" << endl;
+
+  PrintLCS (s1, s2, tbl, tbl.size() - 1, tbl[0].size() - 1);
 }
 
-int main () {
-  char *s1 = "abcdafklg";
-  char *s2 = "acbcfmg";
+int main() {
+  string s1 = "abcdafklg";
+  string s2 = "acbcfmg";
 
-  LongestCommonSubsequence (s1, s2, strlen(s1), strlen(s2));
+  LCS (s1, s2);
+
   return 0;
 }

@@ -1,11 +1,5 @@
 Printf format specifiers:
 How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args);
-char val = -3; printf("%hu\n", val);
-Here, in printf, replace val with the value. There are three different cases here on what to replace val with.
-- If val is signed and the value assigned is negative, then the negative number. (Add the case for out of range negative numbers.)
-- If val is unsigned and the value assigned is negative, then the positive value of the 2's complement of the negative.
-- If value is positive and within the positive range of the datatype, then the actual value.
-- If value is positive but outside the positive range of the type, then find out what value val would have and put that.
 char - %c, signed char - %hhi, %hhd; unsigned char - %hhu, signed short - %hi, %hd; unsigned short - %hu, signed int - %i, %d; unsigned int - %u, signed long - %li, %ld; unsigned long - %lu, signed long long - %lli, %lld; unsigned long long - %llu, short hex - %hx, single byte hex - %hhx.
 How do you print a turning line on a text console? For instance, the in-place turning line on "Waiting for SP...\"?
 unsigned c = 0x2d5c7c2f (These are the ascii's for \,|,/,-, not necessarily in that order, just lookup an ascii table.)
@@ -22,7 +16,7 @@ ls hello[1-4] => Same as above.
 ls 'hello*' or ls hello\* => Don't interpret the wildcard.
 alias ll "ls -l"
 Find a file in Unix: find . -name E6413X3.EFI
-Find the header file needed to use a library function (say, exit()): man exit -s 3. See man man for more info. 2 for system call and 3 for C library.
+Find the header file needed to use a library function (say, exit()): man exit -s 3. See man man for more info. 2 for system call and 3 for libc.
 ======================================================
 Commit these to your memory:
 Dictionary operations: Insert(D,x), Search(D,k), Delete(D,x). Optional operations: Min/Max(D), Predecessor/Successor(D,x). Min/Max are priority queue operations.
@@ -35,9 +29,7 @@ HAProxy - The fastest load balancer. Written in C.
 ======================================================
 C++:
 How do you create a class and still prohibit people from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
-l-values are objects that have a defined memory address and persist beyond a single expression. r-values are temporary values, do not have a defined memory address and only have expression scope.
-You can bind a const reference to an r-value. You cannot bind a non-const reference to an r-value. You can however, to an l-value. See example below:
-int& val = 5; // Doesn't work. const int& val = 5; // Works.
+You can bind a const reference to an r-value. You cannot bind a non-const reference to an r-value. int& val = 5; // Doesn't work. const int& val = 5; // Works.
 If you need a fixed array of unique items:
 std::array < std::unordered_set<int>, 2 > arr = { std::unordered_set<int> {1,2,2,3}, std::unordered_set<int> {2,2,7,5,5} };
 arr[1].insert(13);
