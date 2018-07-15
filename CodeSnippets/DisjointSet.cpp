@@ -11,11 +11,11 @@ using namespace std;
 
 class DisjointSet {
   private:
-    typedef struct node {
+    struct Node {
       int data;
       unsigned rank;
       struct node *parent;
-    } Node;
+    };
 
     unordered_map<int, Node*> umap;
     Node* FindSet (Node *node);

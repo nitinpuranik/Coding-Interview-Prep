@@ -77,10 +77,10 @@ Node* Duplicate (Node *node) {
   Node *newnode = new Node;
   newnode->data = node->data;
 
+  visited.insert({node, newnode});
+
   newnode->left  = Duplicate (node->left);
   newnode->right = Duplicate (node->right);
-
-  visited.insert({node, newnode});
 
   return newnode;
 }
@@ -107,10 +107,10 @@ void PrintMaxSumPath (Node *node, int sum) {
     for (const int item : maxpath)
       cout << item << ' ';
     cout << endl;
+  } else {
+    PrintMaxPath (node->left, sum - node->data);
+    PrintMaxPath (node->right, sum - node->data);
   }
-
-  PrintMaxPath (node->left, sum - node->data);
-  PrintMaxPath (node->right, sum - node->data);
 
   maxpath.pop_back();
 }
@@ -306,7 +306,7 @@ void PrintRange (Node *node, int min, int max) {
     return;
   }
 
-  if (node->data > min) {
+  if (node->data >= min) {
     PrintRange (node->left, min, max);
   }
 
