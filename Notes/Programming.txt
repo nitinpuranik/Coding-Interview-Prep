@@ -150,3 +150,15 @@ cout << pq.top()
 #include <queue>
 #include <functional> // Header for std::greater.
 priority_queue<int, vector<int>, greater<int>> pq; // Gives you a min heap.
+
+#Snippet 7
+# Initialize a two dimensional vector of size 5 x 5 to zeroes.
+vector<vector<int>> tbl;
+
+for (int i = 0; i < 5; i++) {
+  tbl.push_back({0});
+	
+	for (int j = 1; j < 5; j++) {
+	  tbl[i].push_back(0);
+	}
+}

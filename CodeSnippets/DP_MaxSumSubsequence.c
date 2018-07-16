@@ -1,81 +1,86 @@
-#include <stdio.h>
+#include <iostream>
+#include <vector>
+using namespace std;
 
 // MaxContiguousSubsequence() is a brute-force non-dynamic way of computing the maximum contiguous
 // subsequence. This is O(n^2) in time complexity but doesn't need extra space.
-void MaxContiguousSubsequence(int *arr, size_t size) {
-  unsigned int startindex, endindex;
-  unsigned int i,j;
-  int currsum, maxsum;
-
-  if (arr == NULL) {
+void MaxContiguousSubsequence (const vector<int>& arr) {
+  if (arr.empty())
     return;
-  }
+
+  int maxsum, maxindex;
 
   maxsum = arr[0];
-  startindex = endindex = 0;
+  maxindex = 0;
 
-  // Compute the sum of each subarray starting from index zero. Inefficient as there is
-  // a lot of repeat summation. However, if you can't afford sparing additional space,
-  // go with this approach, trading off speed for space savings.
-  for (i = 0; i < size; i++) {
-    currsum = 0;
+  for (unsigned i = 0; i < arr.size(); i++) {
+    int currsum = 0;
 
-    for (j = i; j < size; j++) {
-      currsum = currsum + arr[j];
+    for (unsigned j = i; j < arr.size(); j++) {
+      currsum += arr[j];
 
       if (currsum > maxsum) {
         maxsum = currsum;
-        startindex = i;
-        endindex = j;
+        maxindex = i;
       }
     }
   }
 
-  printf("Max consecutive sum = %d.\n", maxsum);
-  printf("Occurs between indexes %u and %u.\n", startindex, endindex);
+  cout << maxsum << ": ";
+  while (maxsum != 0) {
+    cout << arr[maxindex] << ' ';
+
+    maxsum -= arr[maxindex++];
+  }
+
+  cout << endl;
+}
+
+void PrintSequence (const vector<int>& arr, int sum, int index) {
+  if (sum == 0)
+    return;
+
+  PrintSequence (arr, sum - arr[index], index - 1);
+  cout << arr[index] << ' ';
 }
 
 // MaxContiguousSubsequenceDynamic() is a dynamic programming way of computing the maximum contiguous subsequence.
 // This is faster and is O(n) in time complexity but it does need auxiliary storage on the order of O(n).
-void MaxContiguousSubsequenceDynamic (int *arr, int size) {
-  int maxsum;
-  int s[size];
-  unsigned int i;
-  unsigned int startindex, endindex;
-
-  if (arr == NULL || size <= 0) {
+void MaxContiguousSubsequenceDynamic (const vector<int>& arr) {
+  if (arr.empty())
     return;
-  }
+
+  int maxsum, maxindex;
+  int s[arr.size()];
 
   maxsum = s[0] = arr[0];
-  startindex = endindex = 0;
+  maxindex = 0;
 
-  for (i = 1; i < size; i++) {
+  for (unsigned i = 1; i < arr.size(); i++) {
+    s[i] = arr[i];
+
     if (s[i - 1] + arr[i] > arr[i]) {
       s[i] = s[i - 1] + arr[i];
-    } else {
-      s[i] = arr[i];
     }
 
     if (s[i] > maxsum) {
       maxsum = s[i];
-      endindex = i;
-
-      if (s[i] == arr[i]) {
-        startindex = i;
-      }
+      maxindex = i;
     }
   }
 
-  printf("Max consecutive sum = %d.\n", maxsum);
-  printf("Occurs between indexes %u and %u.\n", startindex, endindex);
+  cout << maxsum << ": ";
+
+  PrintSequence (arr, maxsum, maxindex);
+
+  cout << endl;
 }
 
 int main() {
-  int arr[] = {-2, -3, 4, -1, -2, 1, 5, -3};
+  vector<int> arr {-2, -3, 4, -1, -2, 1, 5, -3};
 
-  MaxContiguousSubsequence(arr, sizeof(arr)/sizeof(int));
-  MaxContiguousSubsequenceDynamic(arr, sizeof(arr)/sizeof(int));
+  MaxContiguousSubsequence(arr);
+  MaxContiguousSubsequenceDynamic(arr);
 
   return 0;
 }

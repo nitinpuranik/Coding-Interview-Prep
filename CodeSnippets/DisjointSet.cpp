@@ -14,7 +14,7 @@ class DisjointSet {
     struct Node {
       int data;
       unsigned rank;
-      struct node *parent;
+      Node *parent;
     };
 
     unordered_map<int, Node*> umap;
@@ -72,12 +72,13 @@ bool DisjointSet::Union (int data1, int data2) {
   if (parent1 == parent2)
     return false;
 
-  if (parent1->rank >= parent2->rank) {
-    parent1->rank = (parent1->rank == parent2->rank) ?
-                    parent1->rank + 1 : parent1->rank;
-    parent2->parent = parent1;
-  } else {
+  if (parent1->rank < parent2->rank) {
     parent1->parent = parent2;
+  } else if (parent1->rank == parent2->rank) {
+    parent2->parent = parent1;
+    parent1->rank++;
+  } else {
+    parent2->parent = parent1;
   }
 
   return true;
