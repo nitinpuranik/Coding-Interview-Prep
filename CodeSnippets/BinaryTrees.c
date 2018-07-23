@@ -60,11 +60,11 @@ void Insert (Node **node, int data) {
 }
 
 /*Bloomberg: Copy a graph. Watch out for the cycle between 1 and 2.
-    0
+    1
    / \
-  1---2
+  0---3
      / \
-    3   4 */
+    2   4 */
 Node* Duplicate (Node *node) {
   static unordered_map<Node*, Node*> visited;
 
@@ -77,6 +77,8 @@ Node* Duplicate (Node *node) {
   Node *newnode = new Node;
   newnode->data = node->data;
 
+	/* If you place this 'insert' call after the below two recursive calls,
+	 * you will run into an infinite loop if 4's left child points back to 3. */
   visited.insert({node, newnode});
 
   newnode->left  = Duplicate (node->left);
@@ -128,19 +130,13 @@ int MaxSum (Node *node) {
 }
 
 unsigned int MaxDepth(Node *node) {
-  unsigned int ldepth;
-  unsigned int rdepth;
-
   if (node == nullptr)
     return 0;
 
-  ldepth = MaxDepth(node->left);
-  rdepth = MaxDepth(node->right);
+  unsigned int ldepth = MaxDepth(node->left);
+  unsigned int rdepth = MaxDepth(node->right);
 
-  if (ldepth > rdepth)
-    return ldepth + 1;
-  else
-    return rdepth + 1;
+	return ldepth > rdepth ? ldepth + 1 : rdepth + 1;
 }
 
 unsigned int Count(Node *node) {
@@ -172,6 +168,7 @@ int MinValue (Node *node) {
  \
   2*/
 bool hasPathSum(Node *node, int sum) {
+	// This condition is necessary because if you instead check if (node == nullptr && data == 0), you'll fail for the above tree with sum 8.
   if (node == nullptr) {
 		return false;
 	}
@@ -319,22 +316,33 @@ void PrintRange (Node *node, int min, int max) {
   }
 }
 
-bool IsBalanced (Node *node) {
-  unsigned ldepth, rdepth;
-  unsigned diff;
-
+bool IsBalancedWorker (Node *node, int *depth) {
+  int ldepth, rdepth;
+  
   if (node == nullptr) {
+    *depth = 0;
     return true;
   }
+  
+  if (IsBalancedWorker (node->left, &ldepth) &&
+      IsBalancedWorker (node->right, &rdepth)) {
+    
+    cout << node->data << ": ldepth = " << ldepth << ", rdepth = " << rdepth << endl; 
+    
+    if (ldepth - rdepth > 1 || rdepth - ldepth > 1)
+      return false;
+    
+    *depth = ldepth > rdepth ? ldepth + 1 : rdepth + 1;
+    return true;
+  }
+  
+  return false;
+}
 
-  ldepth = MaxDepth (node->left);
-  rdepth = MaxDepth (node->right);
-
-  diff = ldepth > rdepth ? ldepth - rdepth : rdepth - ldepth;
-
-  return   (diff <= 1)              &&
-           IsBalanced (node->left)  &&
-           IsBalanced (node->right);
+bool IsBalanced (Node *node) {
+  int depth;
+  
+  return IsBalancedWorker (node, &depth);
 }
 
 Node* Successor (Node *node) {
@@ -365,19 +373,32 @@ Node* Successor (Node *node) {
   return node->parent;
 }
 
-int main(int argc, char **argv)
-{
-  Node *node = nullptr;
-
-  Insert (&node, 5);
-  Insert (&node, 7);
-  Insert (&node, 3);
-  Insert (&node, 1);
-  Insert (&node, 9);
-  Insert (&node, 2);
-  Insert (&node, 6);
-
-  return 0;
+/* Return the max path sum between any two leaves in the tree. */
+int MaxPathSum (Node *node, int *maxsum) {
+  if (node == nullptr)
+    return 0;
+  
+  if (node->left == nullptr && node->right == nullptr) {
+    if (node->data > *maxsum) {
+      *maxsum = node->data;
+    }
+    
+    return node->data;
+  }
+  
+  int lsum = MaxPathSum (node->left, maxsum);
+  int rsum = MaxPathSum (node->right, maxsum);
+  
+  if (lsum == 0)
+    return rsum + node->data;
+  else if (rsum == 0)
+    return lsum + node->data;
+  
+  if (lsum + node->data + rsum > *maxsum) {
+    *maxsum = lsum + node->data + rsum;
+  }
+  
+  return lsum > rsum ? lsum + node->data : rsum + node->data;
 }
 
 /* Check if the given expression is a valid tertiary expression.

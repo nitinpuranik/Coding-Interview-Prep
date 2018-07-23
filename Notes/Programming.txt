@@ -41,7 +41,6 @@ int main() {
   umap.insert({5, {4,7,1,2}}); // If you don't specify the type of second parameter like in the above unordered_set example, it defaults to vector.
 
   // Use auto it = umap.find(5); to reduce verbosity.
-  // umap.find() returns an r-value. So if you need a reference, you need to use a const reference.
   unordered_map <int, vector<int>>::iterator it = umap.find(5);
 
   if (it != umap.end()) {
@@ -62,7 +61,7 @@ int main () {
   adj[4].push_back(5);
   adj[4].push_back(6);
   adj[4].push_back(7);
-  
+
   adj[2].push_back(12);
   adj[2].push_back(9);
   adj[2].push_back(7);
@@ -102,7 +101,7 @@ Output:
 To initialize a dynamic struct:
 struct Node {
   int data;
-  struct Node *next;
+  Node *next;
 };
 
 Node *newnode = new Node {4, nullptr};
