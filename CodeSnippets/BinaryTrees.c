@@ -97,24 +97,40 @@ void Print(Node *node) {
   Print(node->right);
 }
 
-void PrintMaxSumPath (Node *node, int sum) {
-  static vector<int> maxpath;
-
+/* Returning a bool helps in ending your search once you find the
+ * first max path. Else you'll end up scouring the entire tree even
+ * if you find your path at the very beginning. */
+bool PrintMaxSumPath (Node *node, int sum, vector<int>& pathvec) {
   if (node == nullptr)
-    return;
+    return false;
 
-  maxpath.push_back(node->data);
+  pathvec.push_back(node->data);
 
-  if (node->left == nullptr && node->right == nullptr && sum == node->data) {
-    for (const int item : maxpath)
-      cout << item << ' ';
-    cout << endl;
+  if (node->left == nullptr && node->right == nullptr) {
+    if (sum == node->data) {
+      for (int item : pathvec) {
+        cout << item << ' ';
+      }
+
+      /* If you want all paths printed, then comment out
+       * the 'return true' statement. */
+      return true;
+    }
+
+    pathvec.pop_back();
+    return false;
+
   } else {
-    PrintMaxPath (node->left, sum - node->data);
-    PrintMaxPath (node->right, sum - node->data);
-  }
 
-  maxpath.pop_back();
+    if (PrintMaxSumPath (node->left, sum - node->data, pathvec))
+      return true;
+
+    if (PrintMaxSumPath (node->right, sum - node->data, pathvec))
+      return true;
+
+    pathvec.pop_back();
+    return false;
+  }
 }
 
 int MaxSum (Node *node) {
@@ -318,30 +334,30 @@ void PrintRange (Node *node, int min, int max) {
 
 bool IsBalancedWorker (Node *node, int *depth) {
   int ldepth, rdepth;
-  
+
   if (node == nullptr) {
     *depth = 0;
     return true;
   }
-  
+
   if (IsBalancedWorker (node->left, &ldepth) &&
       IsBalancedWorker (node->right, &rdepth)) {
-    
-    cout << node->data << ": ldepth = " << ldepth << ", rdepth = " << rdepth << endl; 
-    
+
+    cout << node->data << ": ldepth = " << ldepth << ", rdepth = " << rdepth << endl;
+
     if (ldepth - rdepth > 1 || rdepth - ldepth > 1)
       return false;
-    
+
     *depth = ldepth > rdepth ? ldepth + 1 : rdepth + 1;
     return true;
   }
-  
+
   return false;
 }
 
 bool IsBalanced (Node *node) {
   int depth;
-  
+
   return IsBalancedWorker (node, &depth);
 }
 
@@ -377,27 +393,27 @@ Node* Successor (Node *node) {
 int MaxPathSum (Node *node, int *maxsum) {
   if (node == nullptr)
     return 0;
-  
+
   if (node->left == nullptr && node->right == nullptr) {
     if (node->data > *maxsum) {
       *maxsum = node->data;
     }
-    
+
     return node->data;
   }
-  
+
   int lsum = MaxPathSum (node->left, maxsum);
   int rsum = MaxPathSum (node->right, maxsum);
-  
+
   if (lsum == 0)
     return rsum + node->data;
   else if (rsum == 0)
     return lsum + node->data;
-  
+
   if (lsum + node->data + rsum > *maxsum) {
     *maxsum = lsum + node->data + rsum;
   }
-  
+
   return lsum > rsum ? lsum + node->data : rsum + node->data;
 }
 
