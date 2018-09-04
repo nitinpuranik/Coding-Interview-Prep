@@ -16,14 +16,14 @@ using namespace std;
 
 /*
  * In a BST, nodes in left subtree <= parent.
- * Nodes in right subtree > parent.
+ * Nodes in right subtree >= parent.
  */
 
-typedef struct node {
+struct Node {
   int data;
-  struct node *left;
-  struct node *right;
-} Node;
+  Node *left;
+  Node *right;
+};
 
 void Insert (Node **node, int data) {
   if (node == nullptr)
@@ -59,6 +59,110 @@ void Insert (Node **node, int data) {
   }
 }
 
+void PrintRange (Node *node, int min, int max) {
+  if (node == nullptr) {
+    return;
+  }
+
+  if (node->data >= min) {
+    PrintRange (node->left, min, max);
+  }
+
+  if (node->data >= min && node->data <= max) {
+    cout << node->data << ' ';
+  }
+
+  if (node->data <= max) {
+    PrintRange (node->right, min, max);
+  }
+}
+
+bool IsBalancedWorker (Node *node, int *depth) {
+  int ldepth, rdepth;
+
+  if (node == nullptr) {
+    *depth = 0;
+    return true;
+  }
+
+  if (IsBalancedWorker (node->left, &ldepth) &&
+      IsBalancedWorker (node->right, &rdepth)) {
+
+    cout << node->data << ": ldepth = " << ldepth << ", rdepth = " << rdepth << endl;
+
+    if (ldepth - rdepth > 1 || rdepth - ldepth > 1)
+      return false;
+
+    *depth = ldepth > rdepth ? ldepth + 1 : rdepth + 1;
+    return true;
+  }
+
+  return false;
+}
+
+bool IsBalanced (Node *node) {
+  if (node == nullptr)
+    return true;
+
+  return IsBalancedWorker (node, nullptr);
+}
+
+Node* Successor (Node *node) {
+  if (node == nullptr) {
+    return nullptr;
+  }
+
+  // Has a right subtree. Return leftmost child.
+  if (node->right) {
+    Node *child = node->right;
+
+    while (child->left) {
+      child = child->left;
+    }
+
+    return child;
+  }
+
+  // No right subtree. If node is left child of parent, return parent.
+  if (node->parent && node->parent->left == node) {
+    return node->parent;
+  }
+
+  while (node->parent && node->parent->right == node) {
+    node = node->parent;
+  }
+
+  return node->parent;
+}
+
+/* Return the max path sum between any two leaves in the tree. */
+int MaxPathSum (Node *node, int *maxsum) {
+  if (node == nullptr)
+    return 0;
+
+  if (node->left == nullptr && node->right == nullptr) {
+    if (node->data > *maxsum) {
+      *maxsum = node->data;
+    }
+
+    return node->data;
+  }
+
+  int lsum = MaxPathSum (node->left, maxsum);
+  int rsum = MaxPathSum (node->right, maxsum);
+
+  if (lsum == 0)
+    return rsum + node->data;
+  else if (rsum == 0)
+    return lsum + node->data;
+
+  if (lsum + node->data + rsum > *maxsum) {
+    *maxsum = lsum + node->data + rsum;
+  }
+
+  return lsum > rsum ? lsum + node->data : rsum + node->data;
+}
+
 /*Bloomberg: Copy a graph. Watch out for the cycle between 1 and 2.
     1
    / \
@@ -77,24 +181,14 @@ Node* Duplicate (Node *node) {
   Node *newnode = new Node;
   newnode->data = node->data;
 
-	/* If you place this 'insert' call after the below two recursive calls,
-	 * you will run into an infinite loop if 4's left child points back to 3. */
+  /* If you place this 'insert' call after the below two recursive calls,
+   * you will run into an infinite loop if 4's left child points back to 3. */
   visited.insert({node, newnode});
 
   newnode->left  = Duplicate (node->left);
   newnode->right = Duplicate (node->right);
 
   return newnode;
-}
-
-void Print(Node *node) {
-  if (!node) {
-    return;
-  }
-
-  Print(node->left);
-  cout << node->data << ' ';
-  Print(node->right);
 }
 
 /* Returning a bool helps in ending your search once you find the
@@ -142,25 +236,26 @@ int MaxSum (Node *node) {
 
   return lsum > rsum ? lsum + node->data : rsum + node->data;
 
-	// From the calling function, you can now call PrintMaxSumPath() to print the path.
+  // From the calling function, you can now call PrintMaxSumPath() to print the path.
 }
 
-unsigned int MaxDepth(Node *node) {
-  if (node == nullptr)
-    return 0;
-
-  unsigned int ldepth = MaxDepth(node->left);
-  unsigned int rdepth = MaxDepth(node->right);
-
-	return ldepth > rdepth ? ldepth + 1 : rdepth + 1;
-}
-
+// PDF problems start here.
 unsigned int Count(Node *node) {
   if (node == nullptr) {
     return 0;
   }
 
   return Count(node->left) + 1 + Count(node->right);
+}
+
+int MaxDepth(Node *node) {
+  if (node == nullptr)
+    return 0;
+
+  int ldepth = MaxDepth(node->left);
+  int rdepth = MaxDepth(node->right);
+
+  return ldepth > rdepth ? ldepth + 1 : rdepth + 1;
 }
 
 int MinValue (Node *node) {
@@ -175,6 +270,14 @@ int MinValue (Node *node) {
   return MinValue(node->left);
 }
 
+void Print(Node *node) {
+  if (node) {
+    Print(node->left);
+    cout << node->data << ' ';
+    Print(node->right);
+  }
+}
+
 /* This is slightly tricky. Check your implementation for the below tree and sum 8.
     5
    / \
@@ -184,49 +287,45 @@ int MinValue (Node *node) {
  \
   2*/
 bool hasPathSum(Node *node, int sum) {
-	// This condition is necessary because if you instead check if (node == nullptr && data == 0), you'll fail for the above tree with sum 8.
+  // This condition is necessary because if you instead check if (node == nullptr && data == 0), you'll fail for the above tree with sum 8.
   if (node == nullptr) {
-		return false;
-	}
+    return false;
+  }
 
-	if (node->left == nullptr && node->right == nullptr) {
-		return sum == node->data;
-	}
+  if (node->left == nullptr && node->right == nullptr) {
+    return sum == node->data;
+  }
 
-	return hasPathSum(node->left, sum - node->data) ||
-	       hasPathSum(node->right, sum - node->data);
+  return hasPathSum(node->left, sum - node->data) ||
+         hasPathSum(node->right, sum - node->data);
 }
 
 void PrintPaths (Node *node) {
-  static vector<int> arr;
-
-	if (node == nullptr)
-		return;
-
-	arr.push_back(node->data);
-
-	if (node->left == NULL && node->right == NULL) {
-
-		for (unsigned i = 0; i < arr.size(); i++) {
-			cout << arr[i] << ' ';
-		}
-		cout << endl;
-
-	} else {
-		PrintPaths (node->left);
-		PrintPaths (node->right);
-	}
-
-	arr.pop_back();
-}
-
-void Mirror (Node *node) {
-  Node *temp;
+  static vector<int> path;
 
   if (node == nullptr)
     return;
 
-  temp = node->left;
+  path.push_back(node->data);
+
+  if (node->left == nullptr && node->right == nullptr) {
+    for (int item : path) {
+      cout << item << ' ';
+    }
+    cout << endl;
+  } else {
+    PrintPaths (node->left);
+    PrintPaths (node->right);
+  }
+
+  path.pop_back();
+}
+
+void Mirror (Node *node) {
+  if (node == nullptr)
+    return;
+
+  Node *temp = node->left;
   node->left = node->right;
   node->right = temp;
 
@@ -312,109 +411,6 @@ bool IsBST (Node *node) {
   lastdata = node->data;
 
   return IsBST (node->right);
-}
-
-void PrintRange (Node *node, int min, int max) {
-  if (node == nullptr) {
-    return;
-  }
-
-  if (node->data >= min) {
-    PrintRange (node->left, min, max);
-  }
-
-  if (node->data >= min && node->data <= max) {
-    printf("%d ", node->data);
-  }
-
-  if (node->data < max) {
-    PrintRange (node->right, min, max);
-  }
-}
-
-bool IsBalancedWorker (Node *node, int *depth) {
-  int ldepth, rdepth;
-
-  if (node == nullptr) {
-    *depth = 0;
-    return true;
-  }
-
-  if (IsBalancedWorker (node->left, &ldepth) &&
-      IsBalancedWorker (node->right, &rdepth)) {
-
-    cout << node->data << ": ldepth = " << ldepth << ", rdepth = " << rdepth << endl;
-
-    if (ldepth - rdepth > 1 || rdepth - ldepth > 1)
-      return false;
-
-    *depth = ldepth > rdepth ? ldepth + 1 : rdepth + 1;
-    return true;
-  }
-
-  return false;
-}
-
-bool IsBalanced (Node *node) {
-  int depth;
-
-  return IsBalancedWorker (node, &depth);
-}
-
-Node* Successor (Node *node) {
-  if (node == nullptr) {
-    return nullptr;
-  }
-
-  // Has a right subtree. Return leftmost child.
-  if (node->right) {
-    Node *child = node->right;
-
-    while (child->left) {
-      child = child->left;
-    }
-
-    return child;
-  }
-
-  // No right subtree. If node is left child of parent, return parent.
-  if (node->parent && node->parent->left == node) {
-    return node->parent;
-  }
-
-  while (node->parent && node->parent->right == node) {
-    node = node->parent;
-  }
-
-  return node->parent;
-}
-
-/* Return the max path sum between any two leaves in the tree. */
-int MaxPathSum (Node *node, int *maxsum) {
-  if (node == nullptr)
-    return 0;
-
-  if (node->left == nullptr && node->right == nullptr) {
-    if (node->data > *maxsum) {
-      *maxsum = node->data;
-    }
-
-    return node->data;
-  }
-
-  int lsum = MaxPathSum (node->left, maxsum);
-  int rsum = MaxPathSum (node->right, maxsum);
-
-  if (lsum == 0)
-    return rsum + node->data;
-  else if (rsum == 0)
-    return lsum + node->data;
-
-  if (lsum + node->data + rsum > *maxsum) {
-    *maxsum = lsum + node->data + rsum;
-  }
-
-  return lsum > rsum ? lsum + node->data : rsum + node->data;
 }
 
 /* Check if the given expression is a valid tertiary expression.
