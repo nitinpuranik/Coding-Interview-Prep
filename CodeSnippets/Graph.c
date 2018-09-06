@@ -15,11 +15,11 @@
 // In all, we would have as many such linked lists as there are nodes.
 // Each item in this linked list is represented by 'struct edgenode' below.
 
-//ToDo: Implement DFS such that we visit each node and each edge once and only once. This needs visited and processed arrays and previous node. Leaving any one of these out will result in some use-case failing. Try with the below graph. Pay attention to how you get to 5 recursively from 2. You need to process the new edge 5 - 2. Check if 2 is processed, if not then 5 - 2 is a new edge. Process it. As you return from recursive calls, you come to 2 and see the 2 - 5 edge. Check if 5 is processed. Since it is, don't process the edge 2 - 5. This use case doesn't need the previous node. But if you visit 2 from 1 and then look for neighbor 1, then using visited and processed semantics alone won't suffice. You do need the help of 'previous' assistance.
+// Implement DFS such that we visit each node and each edge once and only once. This needs visited and processed arrays and previous node. Leaving any one of these out will result in some use-case failing. Try with the below graph. Pay attention to how you get to 5 recursively from 2 through 3. You need to process the new edge 5 - 2. Check if 2 is processed, if not then 5 - 2 is a new edge. Process it. As you return from recursive calls, you come to 2 and see the 2 - 5 edge. Check if 5 is processed. Since it is, don't process the edge 2 - 5. This use case doesn't need the previous node. But if you visit 2 from 1 and then look at neighbor 1, then using visited and processed semantics alone won't suffice. You do need the help of 'previous'.
 
-1--2--3
-|  |  |
-6  5--4
+// 1--2--3
+// |  |  |
+// 6  5--4
 
 typedef enum {
   undiscovered,
@@ -104,62 +104,6 @@ void dfs(graph *g, int u) {
   exit[u] = time++;
 }
 
-void bfs(graph *g, int start) {
-  queue_t q;
-  int i, u, v;
-  edgenode *edge;
-  state_t state[g->nvertices + 1];
-  int parent[g->nvertices + 1];
-
-  for (i = 1; i <= g->nvertices; i++) {
-    state[i] = undiscovered;
-    parent[i] = -1;
-  }
-
-  state[start] = discovered;
-  enqueue(q, start);
-
-  while(!is_empty(q)) {
-    u = dequeue(q);
-    edge = g->edges[u];
-
-    while(edge) {
-      v = edge->y;
-
-			//        1
-      //       / \
-      //      /   \
-      //     2-----3
-      /*
-       * Convince yourself with the above triangular graph diagram that the edge (u,v) is a
-       * new edge only if the node v is not processed or if the graph is a directed graph.
-       * If node v is processed, then for an undirected graph, you've already processed all edges from v, including edge (v,u).
-       * If node v is only in a discovered state in an undirected graph, then you've reached node v through
-       * some edge other than (u,v). So you can process this new edge (u,v) even if v is in the discovered state.
-       */
-      if (state[v] != processed || g->directed) {
-        /*
-         * If v is discovered but not processed, it means this edge won't figure in the BFS tree.
-         * We hit this function call surely once for every new edge.
-         */
-        process_edge(g, u, v);
-      }
-
-      // We enqueue the node only if it is undiscovered. If it is discovered, it means we already
-      // hit this node through some edge other than (u,v) and it should already have been enqueued.
-      if (state[v] == undiscovered) {
-        state[v] = discovered;
-        enqueue(q, v);
-        parent[v] = u;
-      }
-
-      edge = edge->next;
-    }
-
-    state[u] = processed;
-  }
-}
-
 // Connected components is an application of BFS.
 unsigned Connected_Components (graph *g) {
   unsigned conn = 0;
@@ -207,7 +151,6 @@ bool AreNeighbors(graph *g, int x, int y) {
   return false;
 }
 //------------------------------------------------
-// The below implementation is for graphs where the vertex 'u' is not used as an index into the adjacency list.
 #include <iostream>
 #include <set>
 #include <vector>
@@ -219,9 +162,13 @@ class Graph {
   private:
     bool m_directed;
     unordered_map<int, vector<int>> adj;
-    void _DFS (int u); // Visits every node once. Doesn't visit all edges.
-    void _DFS (int u, int prev); // Visits every node and edge once.
+
+    void _DFS_node (int u); // Visits every node once. Doesn't visit all edges.
+    void _DFS_node_edge (int u, int prev); // Visits every node and edge once.
     bool _DFS_Cycle (int u, int prev); // Detects if there is a cycle in the graph.
+
+    void _BFS_node(); // Visits every node once. Doesn't visit all edges.
+    void _BFS_node_edge(); // Visits every node and edge once.
 
   public:
     Graph (bool directed = false) : m_directed (directed) {}
@@ -237,8 +184,9 @@ class Graph {
       return adj;
     }
 
-    void Print ();
-    void DFS ();
+    void Print();
+    void DFS();
+    void BFS();
 };
 
 void Graph::Print() {
@@ -253,7 +201,7 @@ void Graph::Print() {
 }
 
 // Visits every node once. Doesn't visit all edges.
-void Graph::_DFS (int u) {
+void Graph::_DFS_node (int u) {
   static set<int> visited {u};
 
   for (const int v : adj[u]) {
@@ -263,13 +211,13 @@ void Graph::_DFS (int u) {
 
       visited.insert(v);
 
-      _DFS (v);
+      _DFS_node (v);
     }
   }
 }
 
 // Visits every node and edge once.
-void Graph::_DFS (int u, int prev) {
+void Graph::_DFS_node_edge (int u, int prev) {
   static set<int> visited {u};
   static set<int> processed;
 
@@ -283,7 +231,7 @@ void Graph::_DFS (int u, int prev) {
         cout << "Visited node " << v << endl;
 
         visited.insert(v);
-        _DFS (v, u);
+        _DFS_node_edge (v, u);
       }
     }
   }
@@ -318,12 +266,12 @@ void Graph::DFS() {
 
   // Call this method if you need to visit all nodes.
   cout << "Visited node " << startnode << endl;
-  _DFS (startnode);
+  _DFS_node (startnode);
 
   // Call this method if you need to visit all nodes and edges.
   cout << endl;
   cout << "Visited node " << startnode << endl;
-  _DFS (startnode, INT_MIN);
+  _DFS_node_edge (startnode, INT_MIN);
 
   // Call this method if you need to check for cycles.
   cout << endl;
@@ -331,6 +279,83 @@ void Graph::DFS() {
   if (_DFS_Cycle (startnode, INT_MIN) == false) {
     cout << "No cycle." << endl;
   }
+}
+
+void Graph::_BFS_node_edge() {
+  unordered_set<int> visited;
+  unordered_set<int> processed;
+  queue<int> q;
+
+  int first = adj.begin()->first;
+
+  cout << "Visited " << first << endl;
+  visited.insert(first);
+  q.push(first);
+
+  while (!q.empty()) {
+    int u = q.front();
+    q.pop();
+
+    for (int v : adj[u]) {
+      //        1
+      //       / \
+      //      /   \
+      //     2-----3
+      // Convince yourself with the above triangular graph diagram that the edge (u,v) is a
+      // new edge only if the node v is not processed or if the graph is a directed graph.
+      // If node v is processed, then for an undirected graph, you've already processed all edges from v, including edge (v,u).
+      // If node v is only in a discovered state in an undirected graph, then you've reached node v through
+      // some edge other than (u,v). So you can process this new edge (u,v) even if v is in the discovered state.
+      //
+      if (processed.find(v) == processed.end() || m_directed) {
+        // We satisfy this if-conditional once for every unique edge.
+        // If v is discovered but not processed, it means this edge won't figure in the BFS tree.
+        cout << "Processed edge " << u << "-" << v << endl;
+      }
+
+      // We enqueue the node only if it is not visited. If it is visited, it means we already
+      // hit this node through some edge other than (u,v) and it should already have been enqueued.
+      // Or, in the case of 1 - 2 graph, we came to 2 from 1 and are now looking back at 1.
+      if (visited.find(v) == visited.end()) {
+        cout << "Visited " << v << endl;
+        visited.insert(v);
+        q.push(v);
+      }
+    }
+
+    processed.insert(u);
+  }
+}
+
+void Graph::_BFS_node() {
+  int first = adj.begin()->first;
+  queue<int> q;
+  unordered_set<int> visited;
+
+  visited.insert(first);
+  q.push(first);
+
+  cout << "Visited " << first << endl;
+
+  while (!q.empty()) {
+    int u = q.front();
+    q.pop();
+
+    for (int v : adj[u]) {
+      if (visited.find(v) == visited.end()) {
+        cout << "Visited " << v << endl;
+
+        visited.insert(v);
+        q.push(v);
+      }
+    }
+  }
+}
+
+void Graph::BFS() {
+  _BFS_node(); // Visits every node once. Doesn't visit all edges.
+
+  _BFS_node_edge(); // Visits every node and edge once.
 }
 
 int main () {
@@ -344,50 +369,6 @@ int main () {
   g.AddEdge(6,1);
 
   g.DFS();
-
-  return 0;
-}
-//------------------------------------------------
-// The below implementation is for graphs where you use the vertex 'u' as an index into the adjacency list.
-#include <iostream>
-#include <vector>
-#include <deque>
-using namespace std;
-
-class Graph {
-  private:
-    unsigned int m_v;
-    vector < vector<int> > adj;
-
-  public:
-    Graph (unsigned v = 0) : m_v(v) , adj(m_v) { }
-
-    void AddEdge (int u, int v) {
-      adj[u].push_back(v);
-      adj[v].push_back(u);
-    }
-
-    void Print() const;
-};
-
-void Graph::Print() const {
-  for (unsigned i = 0; i < adj.size(); i++) {
-    cout << i << ": ";
-
-    for (const int item : adj[i])
-      cout << item << ' ';
-    cout << endl;
-  }
-}
-
-int main () {
-  Graph g {3};
-
-  g.AddEdge(0,1);
-  g.AddEdge(0,2);
-  g.AddEdge(1,2);
-
-  g.CycleDetected();
 
   return 0;
 }

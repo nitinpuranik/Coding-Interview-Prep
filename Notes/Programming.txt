@@ -23,9 +23,9 @@ Dictionary operations: Insert(D,x), Search(D,k), Delete(D,x). Optional operation
 Priority Queue: Insert(Q,x), Min/Max(Q), DeleteMin/Max(Q)
 ======================================================
 ***OpenSource Projects:
-libsvm (C++), memcached (small project, C, dive in!)
-libevent (C) - Developed by Niels Provos, lighttpd (small, C)
-HAProxy - The fastest load balancer. Written in C.
+http://preshing.com
+https://github.com/fffaraz/awesome-cpp
+OpenSource: TinyVM, libcds, Ceph
 ======================================================
 C++:
 How do you create a class and still prohibit people from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
@@ -40,8 +40,7 @@ int main() {
 
   umap.insert({5, {4,7,1,2}}); // If you don't specify the type of second parameter like in the above unordered_set example, it defaults to vector.
 
-  // Use auto it = umap.find(5); to reduce verbosity.
-  unordered_map <int, vector<int>>::iterator it = umap.find(5);
+  unordered_map <int, vector<int>>::iterator it = umap.find(5); // Use auto it = umap.find(5); to reduce verbosity.
 
   if (it != umap.end()) {
     for (const int item : it->second)
