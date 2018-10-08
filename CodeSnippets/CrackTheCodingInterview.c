@@ -67,7 +67,7 @@ void RemoveUnique (char *str) {
 
 // 1.3 : The above problem with additional storage.
 void RemoveUnique (char *str) {
-  bool table[256] {false};
+  bool table[128] {false};
   unsigned len;
 
   {
@@ -80,11 +80,10 @@ void RemoveUnique (char *str) {
   if (len < 2)
     return;
 
-  unsigned tail = 1;
-  unsigned char idx = str[0];
-  table[idx] = true;
+  unsigned tail = 0;
+  unsigned char idx;
 
-  for (unsigned i = 1; i < len; i++) {
+  for (unsigned i = 0; i < len; i++) {
     idx = str[i];
 
     if (table[idx] == false) {
