@@ -166,5 +166,6 @@ Page 159: Chapters 8 and 9 give the details (Chapters 9 and 10?)
 Page 165: such as arithmetic and comparison, atomically it is ludicrous (comma should be after the word 'atomically')
 Page 167: it is a bug if kernel code is preemptive while it is accessing a shared resource.
 Page 169: Given the proceeding points (preceding points)
+Page 233: Some architectures can physically addressing larger (address)
 -------
 Page 200: Started on 6/8

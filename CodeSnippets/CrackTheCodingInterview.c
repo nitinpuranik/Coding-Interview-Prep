@@ -5,6 +5,36 @@
 /*********************************
 * Chapter 1: Arrays and Strings. *
 *********************************/
+// 1.1 : Unique characters without additional structures.
+bool IsUnique (const string& str) {
+  for (unsigned i = 0; i < str.length() - 1; i++) {
+    for (unsigned j = i + 1; j < str.length(); j++) {
+      if (str[i] == str[j]) {
+        cout << str[i] << " repeats." << endl;
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+// 1.1 : Unique characters with additional structures.
+bool IsUnique (const string& str) {
+  unsigned char ascii[128] {0};
+
+  for (unsigned char c : str) {
+    if (ascii[c]) {
+      cout << c << " repeats.";
+      return false;
+    }
+
+    ascii[c]++;
+  }
+
+  return true;
+}
+
 // 1.3 : Without using additional storage.
 void RemoveUnique (char *str) {
   if (str == nullptr)
@@ -37,7 +67,7 @@ void RemoveUnique (char *str) {
 
 // 1.3 : The above problem with additional storage.
 void RemoveUnique (char *str) {
-  bool table[256] {false};
+  bool table[128] {false};
   unsigned len;
 
   {
@@ -50,11 +80,10 @@ void RemoveUnique (char *str) {
   if (len < 2)
     return;
 
-  unsigned tail = 1;
-  unsigned char idx = str[0];
-  table[idx] = true;
+  unsigned tail = 0;
+  unsigned char idx;
 
-  for (unsigned i = 1; i < len; i++) {
+  for (unsigned i = 0; i < len; i++) {
     idx = str[i];
 
     if (table[idx] == false) {
