@@ -178,12 +178,11 @@ Node* Duplicate (Node *node) {
   if (visited.find (node) != visited.end())
     return visited[node];
 
-  Node *newnode = new Node;
-  newnode->data = node->data;
+  Node *newnode = new Node {node->data, nullptr, nullptr};
 
-  /* If you place this 'insert' call after the below two recursive calls,
+  /* If you put the map insertion operation after the below two recursive calls,
    * you will run into an infinite loop if 4's left child points back to 3. */
-  visited.insert({node, newnode});
+  visited[node] = newnode;
 
   newnode->left  = Duplicate (node->left);
   newnode->right = Duplicate (node->right);
@@ -337,11 +336,7 @@ void DoubleTree (Node *node) {
   if (node == nullptr)
     return;
 
-  Node *newnode = new Node;
-  newnode->data = node->data;
-  newnode->left = node->left;
-  newnode->right = nullptr;
-
+  Node *newnode = new Node {node->data, node->left, nullptr};
   node->left = newnode;
 
   DoubleTree (newnode->left);
