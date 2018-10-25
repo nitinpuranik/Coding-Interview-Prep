@@ -23,13 +23,13 @@ Dictionary operations: Insert(D,x), Search(D,k), Delete(D,x). Optional operation
 Priority Queue: Insert(Q,x), Min/Max(Q), DeleteMin/Max(Q)
 ======================================================
 ***OpenSource Projects:
-http://preshing.com
-https://github.com/fffaraz/awesome-cpp
-OpenSource: TinyVM, libcds, Ceph
+libsvm (C++), memcached (small project, C, dive in!)
+libevent (C) - Developed by Niels Provos, lighttpd (small, C)
+HAProxy - The fastest load balancer. Written in C.
 ======================================================
-C++ warmups:
-How do you create a class and still prohibit people from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
-You can bind a const reference to an r-value. You cannot bind a non-const reference to an r-value. int& val = 5; // No. const int& val = 5; // Yes.
+C++:
+How do you define a class and still prohibit users from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
+You can bind a const reference to an r-value. You cannot bind a non-const reference to an r-value. int& val = 5; // Doesn't work. const int& val = 5; // Works.
 If you need a fixed array of unique items:
 std::array < std::unordered_set<int>, 2 > arr = { std::unordered_set<int> {1,2,2,3}, std::unordered_set<int> {2,2,7,5,5} };
 arr[1].insert(13);
@@ -39,9 +39,9 @@ int main() {
   unordered_map <int, vector<int>> umap;
 
   umap.insert({5, {4,7,1,2}}); // If you don't specify the type of second parameter like in the above unordered_set example, it defaults to vector.
-  umap[5] = {4,7,1,2}; // alternative to the above statement.
 
-  unordered_map <int, vector<int>>::iterator it = umap.find(5); // Use auto it = umap.find(5); to reduce verbosity.
+  // Use auto it = umap.find(5); to reduce verbosity.
+  unordered_map <int, vector<int>>::iterator it = umap.find(5);
 
   if (it != umap.end()) {
     for (const int item : it->second)
@@ -114,7 +114,7 @@ int main() {
   for (int i = 1; i <= 10; i++)
     umap[i] = i * 10;
 
-  for (auto it = umap.begin(); it != umap.end();) { // Note: const auto it will fail. You need non-const.
+  for (auto it = umap.begin(); it != umap.end();) {
     cout << it->first << ": " << it->second << endl;
 
     // Note that you pass 'it' as parameter to the erase function and not it->first.
@@ -157,7 +157,7 @@ vector<vector<int>> tbl;
 for (int i = 0; i < 5; i++) {
   tbl.push_back({0});
 	
-	for (int j = 0; j < 4; j++) {
+	for (int j = 1; j < 5; j++) {
 	  tbl[i].push_back(0);
 	}
 }

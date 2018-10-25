@@ -193,8 +193,10 @@ Node* Duplicate (Node *node) {
 /* Returning a bool helps in ending your search once you find the
  * first max path. Else you'll end up scouring the entire tree even
  * if you find your path at the very beginning. */
-bool PrintMaxSumPath (Node *node, int sum, vector<int>& pathvec) {
-  if (node == nullptr)
+bool PrintMaxSumPath (Node *node, int sum) {
+  static vector<int> pathvec;
+
+	if (node == nullptr)
     return false;
 
   pathvec.push_back(node->data);
@@ -212,18 +214,16 @@ bool PrintMaxSumPath (Node *node, int sum, vector<int>& pathvec) {
 
     pathvec.pop_back();
     return false;
-
-  } else {
-
-    if (PrintMaxSumPath (node->left, sum - node->data, pathvec))
-      return true;
-
-    if (PrintMaxSumPath (node->right, sum - node->data, pathvec))
-      return true;
-
-    pathvec.pop_back();
-    return false;
   }
+
+  if (PrintMaxSumPath (node->left, sum - node->data))
+    return true;
+
+  if (PrintMaxSumPath (node->right, sum - node->data))
+    return true;
+
+  pathvec.pop_back();
+  return false;
 }
 
 int MaxSum (Node *node) {
