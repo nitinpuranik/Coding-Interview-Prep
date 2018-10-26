@@ -1,0 +1,27 @@
+arch - architecture dependent stuff for detecting, for instance, the processor type.
+auth - authentication infrastructure used when daemons start up, make sure that clients are authenticated. Largely static, doesn't change often.
+client - client side userspace implementation of filesystem code, the piece that is used by libcephfs and cephfuse(?) for talking to the filesystem client
+cls - Stands for class. Has the rados classes. Some interesting ones are rgw (rest gateway), rbd.
+common/include - random bits and pieces shared by everything (atomics, link lists, library headers, etc). types.h file handles endian conversions. encoding.h handles how things are serialized into bytestreams. Include also has subdirectories like cephfs, rados that have the headers published with libraries like librados and libcephfs and librbd. These are the headers you would include as a user of these libraries.
+crush — crush algorithm, which is a hashing algorithm for data placement. Mostly self contained but has dependencies on other stuff.
+global - random things used only by self-contained daemons. Not used by any library code. Used by osd daemon, server daemon, has signal handlers.
+gtest — google’s unit test framework used for ceph unit tests
+java — java bindings for libcephfs (used for hadoop binding). May add bindings in the future for other things like librbd and librados. So there's a libcephfs java wrapper that hadoop uses.
+json_spirit - library used to decode json
+librados and librbd have the code for those libraries. For librados, it is just the wrapper part that exposes it as a clean shared object. Most of the client side rados code is in the osdc (osd-client) directory, which is the internal client library for talking to osds.
+osd — server side code for object storage daemon
+os — object store (internal abstraction used for storing data on the local node). That is mostly about having the details about the posix filesystem and the journals that are hidden underneath. There are a lot of abstract interfaces in there. Within the directory, the file ObjectStore.h which is the abstract API that the osd consumes for storing data.
+ocf - heartbeat agent. Not very important.
+msg / messages — used for messaging across the wire. There's a message abstract type and a messenger interface used for sending and receiving messages to other people in a ceph cluster. Messages directory has all the different types of messages that ceph understands how to send.
+mds — code for the metadata server daemon
+mon — code for the monitor daemon
+mount - Has code for mounting file systems.
+rbd_fuse - prototype for rbd_fuse
+rgw — code for the rados gateway daemon
+test - contains all unit tests. Very important directory. Mirrors the main source tree. For example, the common directory under test mirrors the common directory under src.
+Top level source files - Main file for monitor ceph_mon.cc and ceph_mds.cc
+vstart.sh - Very useful for developers to spin up a test cluster.
+
+Videos:
+https://www.youtube.com/watch?v=t5UIehZ1oLs
+http://tracker.ceph.com/projects/ceph/wiki/Code_Walkthroughs
