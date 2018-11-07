@@ -24,4 +24,8 @@ vstart.sh - Very useful for developers to spin up a test cluster.
 
 Videos:
 https://www.youtube.com/watch?v=t5UIehZ1oLs
-http://tracker.ceph.com/projects/ceph/wiki/Code_Walkthroughs
+
+OSD peering:
+Section 6.3 Sage thesis
+Boost statechart library - introduces you to state machines
+pg.h and pg.cc
