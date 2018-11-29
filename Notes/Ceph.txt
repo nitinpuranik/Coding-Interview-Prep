@@ -1,3 +1,4 @@
+Transcribed the below notes from the video: https://www.youtube.com/watch?v=DWK5RrNRhHU&feature=share&t=52m02s
 arch - architecture dependent stuff for detecting, for instance, the processor type.
 auth - authentication infrastructure used when daemons start up, make sure that clients are authenticated. Largely static, doesn't change often.
 client - client side userspace implementation of filesystem code, the piece that is used by libcephfs and cephfuse(?) for talking to the filesystem client
@@ -20,8 +21,20 @@ rbd_fuse - prototype for rbd_fuse
 rgw — code for the rados gateway daemon
 test - contains all unit tests. Very important directory. Mirrors the main source tree. For example, the common directory under test mirrors the common directory under src.
 Top level source files - Main file for monitor ceph_mon.cc and ceph_mds.cc
-vstart.sh - Very useful for developers to spin up a test cluster.
 
-Videos:
-https://www.youtube.com/watch?v=t5UIehZ1oLs
+Helpful resources:
+https://www.youtube.com/watch?v=t5UIehZ1oLs (Getting started with Ceph development.)
+vstart.sh - Very useful for developers to spin up a test cluster. You can setup a toy Ceph cluster after you build the source.
+$ ./vstart.sh -d -n -l
+-d: Enables debugging. Cranks all the debug levels on daemons to very high levels. Helps debug issues when you're running a test cluster.
+-n: Indicates that you're creating a new cluster. There's another way where you get going on an existing cluster config, but that isn't well tested.
+-l: Means that we'll be binding to the localhost 127.0.0.1
+
 http://tracker.ceph.com/projects/ceph/wiki/Code_Walkthroughs
+
+Random Notes:
+With the logic in the os directory, Ceph abstracts the backend store in the storage nodes from the implementation.
+Filestore - To store files.
+Bluestore - The new one. (But what is it?)
+Memstore - Stores everything in memory.
+Kstore - Experimental component that puts things in the database.
