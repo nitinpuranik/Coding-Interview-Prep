@@ -29,12 +29,9 @@ void Insert (Node **node, int data) {
   if (node == nullptr)
     return;
 
-  Node *newnode = new Node;
+  Node *newnode = new Node {data, nullptr, nullptr};
   if (newnode == nullptr)
     return;
-
-  newnode->data = data;
-  newnode->left = newnode->right = nullptr;
 
   Node *curr, *prev;
 
@@ -239,12 +236,12 @@ int MaxSum (Node *node) {
 }
 
 // PDF problems start here.
-unsigned int Count(Node *node) {
+unsigned int size(Node *node) {
   if (node == nullptr) {
     return 0;
   }
 
-  return Count(node->left) + 1 + Count(node->right);
+  return size(node->left) + 1 + size(node->right);
 }
 
 int MaxDepth(Node *node) {
