@@ -1,9 +1,32 @@
+How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args); Here's a sample snippet:
+void Foo1 (string name) { // Assume similar definitions for Foo2, Foo3 and Foo4.
+  cout << __FUNCTION__ << ": " << name << endl;
+}
+
+int main() {
+  void (*fptr[])(string) {Foo1, Foo2, Foo3, Foo4};
+  string names[] {"Nagesh", "Rathna", "Nitin", "Nisha"};
+  
+  for (unsigned i = 0; i < sizeof(fptr)/sizeof(*fptr); i++)
+    fptr[i](names[i]);
+  
+  return 0;
+}
 Printf format specifiers:
-How do you declare an array of function pointers? void (*fn_arr[arr_size])(void *args);
 char - %c, signed char - %hhi, %hhd; unsigned char - %hhu, signed short - %hi, %hd; unsigned short - %hu, signed int - %i, %d; unsigned int - %u, signed long - %li, %ld; unsigned long - %lu, signed long long - %lli, %lld; unsigned long long - %llu, short hex - %hx, single byte hex - %hhx.
-How do you print a turning line on a text console? For instance, the in-place turning line on "Waiting for SP...\"?
-unsigned c = 0x2d5c7c2f (These are the ascii's for \,|,/,-, not necessarily in that order, just lookup an ascii table.)
-To print them in turn, change MSB into LSB for each iteration: printf ("%c\b", c = c << 8 | c >> 24);
+How do you print a turning line on a text console? For instance, the in-place turning line on "Waiting for thread completion...\".
+int main() {
+  unsigned int c = 0x5c7c2f2d; // ASCII for \,|,/,-
+  
+  cout << "Waiting for thread completion...";
+
+  for (unsigned i = 0; i < 4000000; i++) {
+    cout << static_cast<char>(c = c << 8 | c >> 24) << "\b";
+    sleep(1); // Need unistd.h header.
+  }
+  return 0;
+}
+
 To align a value to the closest lower 4K, AND it with ~FFF. To align it to the closest higher 4K, do the same and add 0x1000. So in conclusion, to align to lower 4K, value & ~(0x1000 - 1). Memcached approach: val += alignment - (val % alignment)
 How do you find the offset of a field in a struct? &(((struct node*)0)->Field) gives you the offset.
 ********
@@ -30,7 +53,7 @@ HAProxy - The fastest load balancer. Written in C.
 C++:
 How do you define a class and still prohibit users from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
 You can bind a const reference to an r-value. You cannot bind a non-const reference to an r-value. int& val = 5; // Doesn't work. const int& val = 5; // Works.
-If you need a fixed array of unique items:
+If you need a fixed array of unique items: // If you don't specify the type of items, it defaults to vector and errors out.
 std::array < std::unordered_set<int>, 2 > arr = { std::unordered_set<int> {1,2,2,3}, std::unordered_set<int> {2,2,7,5,5} };
 arr[1].insert(13);
 
@@ -47,13 +70,15 @@ int main() {
     for (const int item : it->second)
       cout << item << ' ';
   }
+
+	return 0;
 }
 
 # Snippet 2:
 int main () {
   unordered_map<int, vector<int>> adj;
 
-  // Note that you can only resort to subscript-based access when the map is not a const object!
+  // Note that you can resort to subscript-based access only when the map is not a const object!
   // const unordered_map<int, vector<int>>& adj_const = adj;
   // const vector<int> vec = adj_const[4] leads to a build error. Replace adj_const with the non-const adj and things work.
   // See snippet 5 for an example.
@@ -82,6 +107,15 @@ int main () {
   adj[3] = {75,1,1};
   adj[11] = {3};
 
+	// An even better way:
+	unordered_map<int, vector<int>> adj = {
+		{4, {4,5,6,7}},
+		{2, {12,9,7}},
+		{7, {0,2}},
+		{3, {75,1,1}},
+		{11, {3}}
+	}
+
   for (const auto& it : adj) {
     cout << it.first << ": ";
     for (const auto& item : it.second) // Iterator in the previous snippet is a pointer. So the '->' operator. Here use the '.' operator.
@@ -105,7 +139,7 @@ struct Node {
 };
 
 Node *newnode = new Node {4, nullptr};
-int *ptr = new int[4] {1,2,3,4}; // Size parameter '4' is mandatory. If more items provided in the initializer list, you get a build error. If less items, then rest set to zero.
+int *ptr = new int[4] {1,2,3,4}; // Size parameter '4' is mandatory. If more items are provided in the initializer list, you get a build error. If less items, then rest are set to zero.
 
 # Snippet 4: To iterate over an unordered_map and remove all elements as you iterate.
 int main() {
@@ -114,7 +148,7 @@ int main() {
   for (int i = 1; i <= 10; i++)
     umap[i] = i * 10;
 
-  for (auto it = umap.begin(); it != umap.end();) {
+  for (auto it = umap.begin(); it != umap.end();) { // No it++
     cout << it->first << ": " << it->second << endl;
 
     // Note that you pass 'it' as parameter to the erase function and not it->first.
