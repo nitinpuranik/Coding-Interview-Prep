@@ -69,39 +69,42 @@ void PrintRange (Node *node, int min, int max) {
     cout << node->data << ' ';
   }
 
-  if (node->data <= max) {
+  if (node->data < max) {
     PrintRange (node->right, min, max);
   }
 }
 
-bool IsBalancedWorker (Node *node, int *depth) {
-  int ldepth, rdepth;
+int IsBalancedWorker (TreeNode* node, bool *bal) {
+  if (node == nullptr || *bal == false)
+		return 0;
 
-  if (node == nullptr) {
-    *depth = 0;
-    return true;
+  int ldepth = IsBalancedWorker (node->left, bal);
+
+  if (*bal == false)
+		return 0;
+
+  int rdepth = IsBalancedWorker (node->right, bal);
+
+  if (*bal == false)
+		return 0;
+
+  if (ldepth > rdepth + 1 || rdepth > ldepth + 1) {
+		*bal = false;
+		return 0;
   }
 
-  if (IsBalancedWorker (node->left, &ldepth) &&
-      IsBalancedWorker (node->right, &rdepth)) {
-
-    cout << node->data << ": ldepth = " << ldepth << ", rdepth = " << rdepth << endl;
-
-    if (ldepth - rdepth > 1 || rdepth - ldepth > 1)
-      return false;
-
-    *depth = ldepth > rdepth ? ldepth + 1 : rdepth + 1;
-    return true;
-  }
-
-  return false;
+  return ldepth > rdepth ? ldepth + 1 : rdepth + 1;
 }
 
 bool IsBalanced (Node *node) {
   if (node == nullptr)
     return true;
 
-  return IsBalancedWorker (node, nullptr);
+  bool bal = true;
+
+  IsBalancedWorker (node, &bal);
+
+  return bal;
 }
 
 Node* Successor (Node *node) {
@@ -193,7 +196,7 @@ Node* Duplicate (Node *node) {
 bool PrintMaxSumPath (Node *node, int sum) {
   static vector<int> pathvec;
 
-	if (node == nullptr)
+  if (node == nullptr)
     return false;
 
   pathvec.push_back(node->data);
@@ -223,6 +226,15 @@ bool PrintMaxSumPath (Node *node, int sum) {
   return false;
 }
 
+/* This returns the maximum sum between root and any node underneath.
+ * Not the maxsum of a path from root to a leaf. For example:
+      8
+     /
+    4
+   /
+ -2
+ This will return 8 + 4 = 12 and not 8 + 4 - 2 = 10.
+ */
 int MaxSum (Node *node) {
   if (node == nullptr)
     return 0;
@@ -233,6 +245,27 @@ int MaxSum (Node *node) {
   return lsum > rsum ? lsum + node->data : rsum + node->data;
 
   // From the calling function, you can now call PrintMaxSumPath() to print the path.
+}
+
+/* This will return 10 if presented with the above 8-4-(-2) tree. */
+int MaxPathSumRootToLeaf (Node *node) {
+  if (node == nullptr)
+    return INT32_MIN;
+
+  if (node->left == nullptr && node->right == nullptr) {
+    return node->data;
+  } else {
+    int lsum, rsum;
+
+    lsum = rsum = INT32_MIN;
+
+    if (node->left)
+      lsum = MaxPathSumRootToLeaf (node->left);
+    if (node->right)
+      rsum = MaxPathSumRootToLeaf (node->right);
+
+    return lsum > rsum ? lsum + node->data : rsum + node->data;
+  }
 }
 
 // PDF problems start here.
