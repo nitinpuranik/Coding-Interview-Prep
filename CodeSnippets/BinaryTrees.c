@@ -75,22 +75,23 @@ void PrintRange (Node *node, int min, int max) {
 }
 
 int IsBalancedWorker (TreeNode* node, bool *bal) {
-  if (node == nullptr || *bal == false)
-		return 0;
+  if (node == nullptr)
+    return 0;
 
   int ldepth = IsBalancedWorker (node->left, bal);
 
   if (*bal == false)
-		return 0;
+    return 0;
 
   int rdepth = IsBalancedWorker (node->right, bal);
 
   if (*bal == false)
-		return 0;
+    return 0;
 
   if (ldepth > rdepth + 1 || rdepth > ldepth + 1) {
-		*bal = false;
-		return 0;
+    cout << "Imbalanced at " << node->data << endl;
+    *bal = false;
+    return 0;
   }
 
   return ldepth > rdepth ? ldepth + 1 : rdepth + 1;
@@ -135,34 +136,6 @@ Node* Successor (Node *node) {
   return node->parent;
 }
 
-/* Return the max path sum between any two leaves in the tree. */
-int MaxPathSum (Node *node, int *maxsum) {
-  if (node == nullptr)
-    return 0;
-
-  if (node->left == nullptr && node->right == nullptr) {
-    if (node->data > *maxsum) {
-      *maxsum = node->data;
-    }
-
-    return node->data;
-  }
-
-  int lsum = MaxPathSum (node->left, maxsum);
-  int rsum = MaxPathSum (node->right, maxsum);
-
-  if (lsum == 0)
-    return rsum + node->data;
-  else if (rsum == 0)
-    return lsum + node->data;
-
-  if (lsum + node->data + rsum > *maxsum) {
-    *maxsum = lsum + node->data + rsum;
-  }
-
-  return lsum > rsum ? lsum + node->data : rsum + node->data;
-}
-
 /*Bloomberg: Copy a graph. Watch out for the cycle between 1 and 2.
     1
    / \
@@ -180,7 +153,7 @@ Node* Duplicate (Node *node) {
 
   Node *newnode = new Node {node->data, nullptr, nullptr};
 
-  /* If you put the map insertion operation after the below two recursive calls,
+  /* If you put this map insertion operation after the below two recursive calls,
    * you will run into an infinite loop if 4's left child points back to 3. */
   visited[node] = newnode;
 
@@ -190,10 +163,50 @@ Node* Duplicate (Node *node) {
   return newnode;
 }
 
+/* Return the max path sum between any two leaves in the tree. */
+int MaxPathSumTwoLeavesWorker (Node *node, int *max) {
+  if (node == nullptr)
+    return INT32_MIN;
+
+  if (node->left == nullptr && node->right == nullptr)
+    return node->data;
+
+  int lsum, rsum;
+  lsum = MaxPathSumTwoLeavesWorker (node->left, max);
+  rsum = MaxPathSumTwoLeavesWorker (node->right, max);
+
+  if (lsum > INT32_MIN && rsum > INT32_MIN) {
+    if (lsum + node->data + rsum > *max) {
+      *max = lsum + node->data + rsum;
+    }
+
+    return lsum > rsum ? lsum + node->data : rsum + node->data;
+  }
+
+  if (lsum > INT32_MIN)
+    return lsum + node->data;
+  else
+    return rsum + node->data;
+}
+
+/* Return the max path sum between any two leaves in the tree. Worker function above. */
+int MaxPathSumTwoLeaves (Node *node) {
+  if (node == nullptr)
+    return INT32_MIN;
+
+  if (node->left == nullptr && node->right == nullptr)
+    return node->data;
+
+  int max = INT32_MIN;
+  int ret = MaxPathSumTwoLeavesWorker (node, &max);
+  return ret > max ? ret : max;
+}
+
 /* Returning a bool helps in ending your search once you find the
  * first max path. Else you'll end up scouring the entire tree even
- * if you find your path at the very beginning. */
-bool PrintMaxSumPath (Node *node, int sum) {
+ * if you find your path at the very beginning.
+ * This prints path from root to leaf. */
+bool PrintMaxPathSum (Node *node, int sum) {
   static vector<int> pathvec;
 
   if (node == nullptr)
@@ -216,56 +229,37 @@ bool PrintMaxSumPath (Node *node, int sum) {
     return false;
   }
 
-  if (PrintMaxSumPath (node->left, sum - node->data))
+  if (PrintMaxPathSum (node->left, sum - node->data))
     return true;
 
-  if (PrintMaxSumPath (node->right, sum - node->data))
+  if (PrintMaxPathSum (node->right, sum - node->data))
     return true;
 
   pathvec.pop_back();
   return false;
 }
 
-/* This returns the maximum sum between root and any node underneath.
- * Not the maxsum of a path from root to a leaf. For example:
-      8
-     /
-    4
-   /
- -2
- This will return 8 + 4 = 12 and not 8 + 4 - 2 = 10.
- */
-int MaxSum (Node *node) {
-  if (node == nullptr)
-    return 0;
-
-  int lsum = MaxSum (node->left);
-  int rsum = MaxSum (node->right);
-
-  return lsum > rsum ? lsum + node->data : rsum + node->data;
-
-  // From the calling function, you can now call PrintMaxSumPath() to print the path.
-}
-
 /* This will return 10 if presented with the above 8-4-(-2) tree. */
-int MaxPathSumRootToLeaf (Node *node) {
+int MaxSumRootToLeaf (Node *node) {
   if (node == nullptr)
+    /*
+     * This return value is the only difference between the above function
+     * and this function. Returning 0 will give you the maximum between root
+     * and any node including a non-leaf node. Returning INT32_MIN will give
+     * you the maximum between root and a leaf. This little subtlety makes a
+     * difference only if the tree contains negatives. It won't matter if there
+     * are all positives in the tree.
+     */
     return INT32_MIN;
 
   if (node->left == nullptr && node->right == nullptr) {
     return node->data;
-  } else {
-    int lsum, rsum;
-
-    lsum = rsum = INT32_MIN;
-
-    if (node->left)
-      lsum = MaxPathSumRootToLeaf (node->left);
-    if (node->right)
-      rsum = MaxPathSumRootToLeaf (node->right);
-
-    return lsum > rsum ? lsum + node->data : rsum + node->data;
   }
+
+  int lsum = MaxSumRootToLeaf (node->left);
+  int rsum = MaxSumRootToLeaf (node->right);
+
+  return lsum > rsum ? lsum + node->data : rsum + node->data;
 }
 
 // PDF problems start here.

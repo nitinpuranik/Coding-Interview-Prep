@@ -14,11 +14,10 @@ void PrintLPS (const string& str, const auto& tbl, int row, int col) {
       PrintLPS (str, tbl, row + 1, col - 1);
 
       cout << str[col];
+    } else if (tbl[row][col - 1] > tbl[row + 1][col]) {
+      PrintLPS (str, tbl, row, col -1);
     } else {
-      if (tbl[row][col - 1] > tbl[row + 1][col])
-        PrintLPS (str, tbl, row, col -1);
-      else
-        PrintLPS (str, tbl, row + 1, col);
+      PrintLPS (str, tbl, row + 1, col);
     }
   }
 }
@@ -49,6 +48,19 @@ void LPS (const string& str) {
       } else {
         tbl[i][i + gap] = tbl[i][i + gap - 1] > tbl[i + 1][i + gap] ?
                             tbl[i][i + gap - 1] : tbl[i + 1][i + gap];
+      }
+    }
+  }
+
+  /* An easier, more intuitive way of implementing the above loop is like so. */
+  for (unsigned k = 1; k < str.length(); k++) {
+    for (unsigned row = 0, col = k; col < str.length(); row++, col++) {
+      if (str[row] == str[col]) {
+        tbl[row][col] = tbl[row + 1][col - 1] + 2;
+      } else if (tbl[row][col - 1] > tbl[row + 1][col]) {
+        tbl[row][col] = tbl[row][col - 1];
+      } else {
+        tbl[row][col] = tbl[row + 1][col];
       }
     }
   }

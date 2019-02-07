@@ -13,11 +13,11 @@
 using namespace std;
 
 bool IsCircular (const vector<int>& arr) {
-  unordered_set<int> visited;
+  if (arr.empty())
+    return true; /* Could be false. Depends on requirement. */
 
   int index = 0;
-
-  visited.insert(0);
+  unordered_set<int> visited{0};
 
   while(true) {
     index += arr[index];
@@ -30,7 +30,10 @@ bool IsCircular (const vector<int>& arr) {
     index %= arr.size();
 
     if (visited.find(index) != visited.end())
-      return index == 0;
+      /* If you don't compare sizes, you will signal
+       * false positive for {2,-1,1}, or {-1,3,1}.
+       */
+      return index == 0 && visited.size() == arr.size();
 
     visited.insert(index);
   }
