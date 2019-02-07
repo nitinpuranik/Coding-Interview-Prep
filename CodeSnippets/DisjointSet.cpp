@@ -13,39 +13,34 @@ class DisjointSet {
   private:
     struct Node {
       int data;
-      unsigned rank;
+      int rank;
       Node *parent;
     };
 
     unordered_map<int, Node*> umap;
-    Node* FindSet (Node *node);
+    Node* FindSet (Node*);
 
   public:
     int FindSet (int data);
-    bool Union (int data1, int data2);
+    void Union (int data1, int data2);
     void MakeSet (int data);
 };
 
 void DisjointSet::MakeSet (int data) {
-  Node *newnode = new Node;
-  newnode->data = data;
-  newnode->rank = 0;
-  newnode->parent = newnode;
-
-  umap[data] = newnode;
+  if (umap.find(data) == umap.end()) {
+    Node *newnode = new Node {data, 0, nullptr};
+    newnode->parent = newnode;
+    umap[data] = newnode;
+  }
 }
 
 int DisjointSet::FindSet (int data) {
-  Node *node = umap[data];
+  Node *parent = FindSet (umap[data]);
 
-  if (node == nullptr) {
-    cout << data << ": Invalid parameter!" << endl;
-    return 0xdeadbeef;
-  }
+  if (parent)
+    return parent->data;
 
-  Node *root = FindSet(node);
-
-  return root->data;
+  return 0xdeadbeef;
 }
 
 DisjointSet::Node* DisjointSet::FindSet (Node *node) {
@@ -59,18 +54,12 @@ DisjointSet::Node* DisjointSet::FindSet (Node *node) {
   return node->parent;
 }
 
-bool DisjointSet::Union (int data1, int data2) {
-  Node *node1 = umap[data1];
-  Node *node2 = umap[data2];
+void DisjointSet::Union (int data1, int data2) {
+  Node *parent1 = FindSet (umap[data1]);
+  Node *parent2 = FindSet (umap[data2]);
 
-  if (node1 == nullptr || node2 == nullptr)
-    return false;
-
-  Node *parent1 = FindSet (node1);
-  Node *parent2 = FindSet (node2);
-
-  if (parent1 == parent2)
-    return false;
+  if (parent1 == nullptr || parent2 == nullptr || parent1 == parent2)
+    return;
 
   if (parent1->rank < parent2->rank) {
     parent1->parent = parent2;
@@ -80,8 +69,6 @@ bool DisjointSet::Union (int data1, int data2) {
   } else {
     parent2->parent = parent1;
   }
-
-  return true;
 }
 
 int main() {
