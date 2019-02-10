@@ -1,77 +1,65 @@
-#include <stdio.h>
+#include <iostream>
+#include <vector>
+using namespace std;
 
 // To get an array in the ascending order, build a MaxHeap.
 // To get an array in the descending order, build a MinHeap.
-void swap (int *arr, int i, int j) {
-  int temp;
+void Heapify (vector<int>& arr, int i, int n) {
+  int left = 2 * i + 1;
+  int right = 2 * i + 2;
 
-  temp = arr[i];
-  arr[i] = arr[j];
-  arr[j] = temp;
-}
+  int largest = i;
 
-void heapify (int *arr, int n, int i) {
-  int largest;
-  int lchild, rchild;
+  // Get the largest item among node, left child and right child.
+  if (left < n && arr[left] > arr[largest])
+    largest = left;
 
-  largest = i;
-  lchild = 2 * i + 1;
-  rchild = 2 * i + 2;
-
-  // Get the largest item among root, left child and right child.
-  if (lchild < n && arr[largest] < arr[lchild]) {
-    largest = lchild;
-  }
-
-  if (rchild < n && arr[largest] < arr[rchild]) {
-    largest = rchild;
-  }
+  if (right < n && arr[right] > arr[largest])
+    largest = right;
 
   if (largest != i) {
-    swap (arr, i, largest);
+    int temp = arr[i];
+    arr[i] = arr[largest];
+    arr[largest] = temp;
 
-    // You heapified the root at index i. Now heapify down.
-    heapify (arr, n, largest);
+    // You heapified the node at index i. Now heapify down.
+    Heapify (arr, largest, n);
   }
 }
 
-void heapsort (int *arr, int n) {
-  int i;
-
-  if (arr == NULL || n <= 0) {
+void Heapsort (vector<int>& arr) {
+  if (arr.empty())
     return;
-  }
 
   // Build the initial MaxHeap. i = (n / 2) - 1 because the index of the first
   // non-leaf node in the complete binary tree begins there. Start at the first
   // non-leaf index and begin heapifying down as you go along to the root.
-  for (i = n / 2 - 1; i >= 0; i--) {
-    heapify (arr, n, i);
-  }
+  for (int i = arr.size() / 2 - 1; i >= 0; i--)
+    Heapify (arr, i, arr.size());
 
   // Now that you've built your initial MaxHeap, you can find the max item at the
   // root of the tree. Swap it with the last item and be done with it. Heapify at
   // the root which now has a new element. Rinse and repeat till i > 0. Note that
   // i > 0 is sufficient and i >= 0 is not necessary, since you would be done with
   // sorting at i = 1.
-  for (i = n - 1; i > 0; i--) {
-    swap (arr, 0, i);
+  for (int i = arr.size() - 1; i > 0; i--) {
+    int temp = arr[i];
+    arr[i] = arr[0];
+    arr[0] = temp;
 
     // By passing in 'i' for the array size, you are gradually dealing with the array
     // that gets smaller and smaller, starting with n - 1, n - 2, ...., 1.
-    heapify (arr, i, 0);
+    Heapify (arr, 0, i);
   }
 }
 
-int main () {
-  int arr[] = {12, 11, 13, 5, 6, 7, 9};
-  int i;
+int main() {
+  vector<int> arr {12, 11, 13, 5, 6, 7, 9};
 
-  heapsort (arr, 7);
+  Heapsort (arr);
 
-  for (i = 0; i < 7; i++) {
-    printf("%d ", arr[i]);
-  }
+  for (unsigned i = 0; i < arr.size(); i++)
+    cout << arr[i] << ' ';
 
   return 0;
 }

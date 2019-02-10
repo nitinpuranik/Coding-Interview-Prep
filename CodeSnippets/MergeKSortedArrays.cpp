@@ -2,90 +2,41 @@
 
 #include <iostream>
 #include <vector>
-#include <climits>
+#include <queue>
+#include <functional>
 using namespace std;
 
-struct MinHeapNode {
-  int data;
-  unsigned row;
-  unsigned idx;
-};
+void SortAll (const vector<vector<int>>& tbl) {
+  vector<int> vsorted;
+  vector<unsigned> vindex; // Vector to keep track of moving indexes through each array of tbl.
+  priority_queue<int, vector<int>, greater<int>> pq;
 
-void swap (auto& heap, unsigned i, unsigned j) {
-  heap[i]->data = heap[i]->data ^ heap[j]->data;
-  heap[j]->data = heap[i]->data ^ heap[j]->data;
-  heap[i]->data = heap[i]->data ^ heap[j]->data;
-  
-  heap[i]->row = heap[i]->row ^ heap[j]->row;
-  heap[j]->row = heap[i]->row ^ heap[j]->row;
-  heap[i]->row = heap[i]->row ^ heap[j]->row;
-  
-  heap[i]->idx = heap[i]->idx ^ heap[j]->idx;
-  heap[j]->idx = heap[i]->idx ^ heap[j]->idx;
-  heap[i]->idx = heap[i]->idx ^ heap[j]->idx;
-}
+  for (unsigned i = 0; i < tbl.size(); i++) {
+    vindex.push_back(0);
+    pq.push(tbl[i][0]);
+  }
 
-void Heapify (auto& heap, unsigned idx) {
-  unsigned left;
-  unsigned right;
-  
-  left = 2 * idx + 1;
-  right = left + 1;
-  
-  unsigned smallest = idx;
-  
-  if (left < heap.size()) {
-    if (heap[left]->data < heap[smallest]->data)
-      smallest = left;
-  }
-  
-  if (right < heap.size()) {
-    if (heap[right]->data < heap[smallest]->data)
-      smallest = right;
-  }
-  
-  if (smallest != idx) {
-    swap (heap, idx, smallest);
-    
-    Heapify (heap, smallest);
-  }
-}
+  // Once the top element of the min-heap becomes INT32_MAX, it means you are done.
+  while (pq.top() != INT32_MAX) {
+    vsorted.push_back(pq.top());
 
-void SortAll (const auto& table) {
-  vector<MinHeapNode*> heap;
-  vector<int> SortedArr;
-  unsigned rowsize = table.size();
-  
-  for (unsigned idx = 0; idx < rowsize; idx++) {
-    if (table[idx].size()) {
-      MinHeapNode *node = new MinHeapNode {table[idx][0], idx, 0};
-      
-      heap.push_back(node);
+    for (unsigned i = 0; i < vindex.size(); i++) {
+      if (tbl[i][vindex[i]] == pq.top()) {
+        vindex[i]++;
+        pq.pop();
+
+        if (vindex[i] == tbl[i].size()) {
+          pq.push(INT32_MAX);
+        } else {
+          pq.push(tbl[i][vindex[i]]);
+        }
+
+        break;
+      }
     }
   }
-  
-  for (unsigned idx = 0; idx <= rowsize / 2 - 1; idx++) {
-    Heapify (heap, idx);
-  }
-  
-  while(true) {
-    SortedArr.push_back (heap[0]->data);
-    
-    if (heap[0]->idx + 1 == table[heap[0]->row].size()) {
-      heap[0]->data = INT_MAX;
-    } else {
-      heap[0]->data = table[heap[0]->row][heap[0]->idx + 1];
-      heap[0]->idx++;
-    }
-    
-    Heapify (heap, 0);
-    if (heap[0]->data == INT_MAX)
-      break;
-  }
-  
-  //SortedArr.push_back (heap[0]->data);
-  
-  for (const int item : SortedArr)
+
+  for (int item : vsorted)
     cout << item << ' ';
 }
 
@@ -95,8 +46,9 @@ int main () {
                                 {2,4,6,8,19},
                                 {0,9,10,11,128}
                               };
-  
+
   SortAll (table);
-  
+	// Output: 0 1 2 3 4 5 6 7 8 9 10 11 12 19 128
+
   return 0;
 }
