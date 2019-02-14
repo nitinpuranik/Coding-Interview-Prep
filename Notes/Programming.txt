@@ -40,6 +40,10 @@ ls 'hello*' or ls hello\* => Don't interpret the wildcard.
 alias ll "ls -l"
 Find a file in Unix: find . -name E6413X3.EFI
 Find the header file needed to use a library function (say, exit()): man exit -s 3. See man man for more info. 2 for system call and 3 for libc.
+To append a byte to a file: truncate -s +1 test.img
+To remove a byte from a file: truncate -s -1 test.img
+Create a 3G image: dd if=/dev/zero of=test.img bs=1048576 count=3072
+Create a zero byte image: dd if=/dev/zero of=test.img bs=1 count=0
 ======================================================
 Commit these to your memory:
 Dictionary operations: Insert(D,x), Search(D,k), Delete(D,x). Optional operations: Min/Max(D), Predecessor/Successor(D,x). Min/Max are priority queue operations.

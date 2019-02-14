@@ -1,10 +1,10 @@
 #include <iostream>
 using namespace std;
 
-typedef struct node {
+struct Node {
   long data;
-  struct node *next;
-} Node;
+  Node *next;
+};
 
 void Print (Node *node) {
   while (node) {
@@ -16,17 +16,16 @@ void Print (Node *node) {
 }
 
 void Insert (Node **head, long data) {
-  if (head == nullptr)
-    return;
+  if (head) {
+    Node *newnode = new (nothrow) Node {data, *head};
 
-  Node *newnode = new Node;
-  newnode->data = data;
-  newnode->next = *head;
-  *head = newnode;
+    if (newnode)
+      *head = newnode;
+  }
 }
 
 unsigned int Count (Node *list, long data) {
-  unsigned int count = 0;
+  unsigned count {0};
 
   while (list) {
     if (list->data == data)
@@ -39,7 +38,7 @@ unsigned int Count (Node *list, long data) {
 }
 
 long GetNth (Node *node, int index) {
-  while (node && index >= 0) {
+  while (node && index > 0) {
     node = node->next;
     index--;
   }
@@ -81,9 +80,8 @@ void Insert (Node **head, long index, long data) {
   if (head == nullptr || index < 0)
     return;
 
-  Node *curr, *prev;
-  curr = *head;
-  prev = nullptr;
+  Node *curr = *head;
+  Node *prev = nullptr;
 
   while (curr && index > 0) {
     prev = curr;
@@ -92,9 +90,7 @@ void Insert (Node **head, long index, long data) {
   }
 
   if (index == 0) {
-    Node *newnode = new Node;
-    newnode->data = data;
-    newnode->next = curr;
+    Node *newnode = new Node {data, curr};
 
     if (prev) {
       prev->next = newnode;
@@ -105,14 +101,12 @@ void Insert (Node **head, long index, long data) {
 }
 
 void SortedInsert (Node **head, Node *newnode) {
-  Node *curr, *prev;
-
   if (head == NULL || newnode == NULL) {
     return;
   }
 
-  prev = NULL;
-  curr = *head;
+  Node *prev = nullptr;
+  Node *curr = *head;
 
   while (curr && curr->data < newnode->data) {
     prev = curr;

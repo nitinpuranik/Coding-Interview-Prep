@@ -21,20 +21,25 @@ void PrintSeq(const vector<int>& arr, int *pred, int index) {
 }
 
 void LongestSeq(const vector<int>& arr) {
+  if (arr.empty())
+    return;
+
   int l[arr.size()] {1};    // Length of the longest sequence ending at each item in the array.
   int pred[arr.size()] {-1}; // Index of predecessor of each item in the array. Needed to print the sequence.
   int maxl = 1;       // Length of the longest increasing sequence.
   int maxindex = 0;   // Index of the last item in the longest sequence.
 
   for (unsigned i = 1; i < arr.size(); i++) {
-    if (arr[i] > arr[maxindex]) {
+    /* This is an important optimization. */
+    if (arr[i] > arr[maxindex]) { // A simple flip of the comparator and you have the longest decreasing subsequence!
       l[i] = maxl + 1;
-      maxl = l[i];
       pred[i] = maxindex;
-      maxindex = i;
     } else {
+      l[i] = 1;
+      pred[i] = -1;
+
       for (unsigned j = 0; j < i; j++) {
-        if (arr[j] < arr[i]) { // A simple flip of the comparator and you have the longest decreasing subsequence!
+        if (arr[i] > arr[j]) { // A simple flip of the comparator and you have the longest decreasing subsequence!
           // Check if this item extends the longest sequence seen so far for items to its left which are less than this item.
           if (l[j] >= l[i]) { // Note the >=. If it is just >, then that's a bug. Run the program and see for yourself.
             l[i] = l[j] + 1;
@@ -42,12 +47,12 @@ void LongestSeq(const vector<int>& arr) {
           }
         }
       }
+    }
 
-      // Keep track of the longest sequence seen so far.
-      if (l[i] > maxl) {
-        maxl = l[i];
-        maxindex = i;
-      }
+    // Keep track of the longest sequence seen so far.
+    if (l[i] > maxl) {
+      maxl = l[i];
+      maxindex = i;
     }
   }
 

@@ -3,7 +3,7 @@
 using namespace std;
 
 /*
- * Algorithm: Take two strings - say abcm and acm. Check if the last two characters
+ * Algorithm: Take two strings - say abcm and acm. Recursively check if the last two characters
  * are the same. If they are, then the length of the subsequence is the LCS of the two
  * strings without the last string, plus one. That is, LCS(abcm, acm) = LCS(abc, ac) + 1.
  * If the last two characters don't match, LCS(abck, acm) = max(LCS(abck, ac), LCS(abc, acm)).
