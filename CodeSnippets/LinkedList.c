@@ -2,7 +2,7 @@
 using namespace std;
 
 struct Node {
-  long data;
+  int data;
   Node *next;
 };
 
@@ -12,7 +12,7 @@ void Print (Node *node) {
     node = node->next;
   }
 
-	cout << endl;
+  cout << endl;
 }
 
 void Insert (Node **head, long data) {
@@ -101,7 +101,7 @@ void Insert (Node **head, long index, long data) {
 }
 
 void SortedInsert (Node **head, Node *newnode) {
-  if (head == NULL || newnode == NULL) {
+  if (head == nullptr || newnode == nullptr) {
     return;
   }
 
@@ -125,12 +125,12 @@ void SortedInsert (Node **head, Node *newnode) {
 void InsertSort(Node **head) {
   Node *curr, *newnode;
 
-  if (head == NULL || *head == NULL) {
+  if (head == nullptr || *head == nullptr) {
     return;
   }
 
   curr = *head;
-  *head = NULL;
+  *head = nullptr;
 
   while (curr) {
     newnode = curr;
@@ -143,7 +143,7 @@ void InsertSort(Node **head) {
 void Append (Node **A, Node **B) {
   Node *curr;
 
-  if (A == NULL || B == NULL || *B == NULL) {
+  if (A == nullptr || B == nullptr || *B == nullptr) {
     return;
   }
 
@@ -159,14 +159,14 @@ void Append (Node **A, Node **B) {
     *A = *B;
   }
 
-  *B = NULL;
+  *B = nullptr;
 }
 
 /* Have a one node jumping slow pointer and two node jumping fast pointer. */
 void FrontBackSplit (Node *source, Node **frontRef, Node **backRef) {
   Node *fast, *slow;
 
-  if (source == NULL || frontRef == NULL || backRef == NULL) {
+  if (source == nullptr || frontRef == nullptr || backRef == nullptr) {
     return;
   }
 
@@ -180,7 +180,7 @@ void FrontBackSplit (Node *source, Node **frontRef, Node **backRef) {
 
   *frontRef = source;
   *backRef = slow->next;
-  slow->next = NULL;
+  slow->next = nullptr;
 }
 
 void RemoveDuplicates (Node *head) {
@@ -190,7 +190,7 @@ void RemoveDuplicates (Node *head) {
 
       head->next = delnode->next;
 
-      free(delnode);
+      delete delnode;
     } else {
       head = head->next;
     }
@@ -200,7 +200,7 @@ void RemoveDuplicates (Node *head) {
 void MoveNode (Node **dest, Node **source) {
   Node *movenode;
 
-  if (dest == NULL || source == NULL || *source == NULL) {
+  if (dest == nullptr || source == nullptr || *source == nullptr) {
     return;
   }
 
@@ -214,7 +214,7 @@ void MoveNode (Node **dest, Node **source) {
 void AlternatingSplit (Node *source, Node **aRef, Node **bRef) {
   int count = 0;
 
-  if (aRef == NULL || bRef == NULL) {
+  if (aRef == nullptr || bRef == nullptr) {
     return;
   }
 
@@ -230,31 +230,27 @@ void AlternatingSplit (Node *source, Node **aRef, Node **bRef) {
 }
 
 Node* ShuffleMerge (Node *a, Node *b) {
-  Node *temp, *aRef;
-
-  if (a == NULL) {
+  if (a == nullptr)
     return b;
-  } else if (b == NULL) {
+  else if (b == nullptr)
     return a;
+
+  Node *mergelist = a;
+
+  while (a && a->next && b) {
+    Node *bnext = b->next;
+
+    b->next = a->next;
+    a->next = b;
+
+    a = b->next;
+    b = bnext;
   }
 
-  aRef = a;
+  if (a->next == nullptr)
+    a->next = b;
 
-  while (a && b) {
-    temp = b;
-    b = b->next;
-
-    temp->next = a->next;
-    a->next = temp;
-
-    a = temp->next;
-  }
-
-  if (b) {
-    temp->next = b;
-  }
-
-  return aRef;
+  return mergelist;
 }
 
 Node* SortedMerge (Node *a, Node *b) {
@@ -263,30 +259,37 @@ Node* SortedMerge (Node *a, Node *b) {
   else if (b == nullptr)
     return a;
 
-  Node *prev = nullptr;
-  Node *curr = a->data < b->data ? a : b;
-  Node *other = (curr == b) ? a : b;
+  Node *mergelist;
 
-  while (curr && other) {
-    if (curr->data < other->data) {
-      prev = curr;
+  if (a->data < b->data) {
+    mergelist = a;
+    a = a->next;
+  } else {
+    mergelist = b;
+    b = b->next;
+  }
+
+  Node *curr = mergelist;
+
+  while (a && b) {
+    if (a->data < b->data) {
+      curr->next = a;
+      a = a->next;
       curr = curr->next;
     } else {
-      Node *nextnode = other->next;
-
-      other->next = curr;
-      prev->next = other;
-
-      prev = other;
-      other = nextnode;
+      curr->next = b;
+      b = b->next;
+      curr = curr->next;
     }
   }
 
-  if (other) {
-    prev->next = other;
+  if (a) {
+    curr->next = a;
+  } else {
+    curr->next = b;
   }
 
-  return a->data < b->data ? a : b;
+  return mergelist;
 }
 
 void MergeSort(Node **headRef) {
@@ -304,13 +307,11 @@ void MergeSort(Node **headRef) {
 void Push (Node **headRef, int data) {
   Node *newnode;
 
-  if (headRef == NULL) {
+  if (headRef == nullptr) {
     return;
   }
 
-  newnode = (Node*) malloc (sizeof(Node));
-  newnode->data = data;
-  newnode->next = *headRef;
+  newnode = new Node {data, *headRef};
   *headRef = newnode;
 }
 
@@ -338,11 +339,11 @@ Node* SortedIntersect (Node *a, Node *b) {
 
 // Iterative solution.
 void Reverse (Node **head) {
-  if (head == nullptr || *head == nullptr)
+  if (head == nullptr)
     return;
 
-  Node *curr = (*head)->next;
-  (*head)->next = nullptr;
+  Node *curr = *head;
+  *head = nullptr;
 
   while (curr) {
     Node *nextnode = curr->next;
@@ -353,25 +354,22 @@ void Reverse (Node **head) {
   }
 }
 
-// Recursive helper function.
-void __Reverse (Node **head, Node *curr) {
-  if (curr) {
-    Node *nextnode = curr->next;
+void RecursiveReverseWorker (Node **headRef, Node *node) {
+  if (node) {
+    Node *nextnode = node->next;
+    node->next = *headRef;
+    *headRef = node;
 
-    curr->next = *head;
-    *head = curr;
-
-    __Reverse (head, nextnode);
+    RecursiveReverseWorker (headRef, nextnode);
   }
 }
 
-// Recursive solution.
-void Reverse (Node **head) {
-  if (head == nullptr || *head == nullptr)
+void RecursiveReverse (Node **headRef) {
+  if (headRef == nullptr)
     return;
 
-  Node *curr = (*head)->next;
-  (*head)->next = nullptr;
+  Node *node = *headRef;
+  *headRef = nullptr;
 
-  __Reverse (head, curr);
+  RecursiveReverseWorker (headRef, node);
 }
