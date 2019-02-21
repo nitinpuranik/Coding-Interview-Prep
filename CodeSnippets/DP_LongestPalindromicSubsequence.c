@@ -26,33 +26,12 @@ void LPS (const string& str) {
   if (str.empty())
     return;
 
-  vector<vector<int>> tbl;
-
-  // Initialize the entire table although you'll only use the upper
-  // triangular half of it because for strings like "abba", you might
-  // end up using a garbage uninitialized value.
-  for (unsigned i = 0; i < str.length(); i++) {
-    tbl.push_back({0});
-
-    for (unsigned j = 1; j < str.length(); j++)
-      tbl[i].push_back(0);
-  }
+  vector<vector<int>> tbl (str.length(), vector<int>(str.length(), 0));
 
   for (unsigned i = 0; i < str.length(); i++)
     tbl[i][i] = 1;
 
-  for (unsigned gap = 1; gap < str.length(); gap++) {
-    for (unsigned i = 0; i < str.length() - gap; i++) {
-      if (str[i] == str[i + gap]) {
-        tbl[i][i + gap] = 2 + tbl[i + 1][i + gap - 1];
-      } else {
-        tbl[i][i + gap] = tbl[i][i + gap - 1] > tbl[i + 1][i + gap] ?
-                            tbl[i][i + gap - 1] : tbl[i + 1][i + gap];
-      }
-    }
-  }
-
-  /* An easier, more intuitive way of implementing the above loop is like so. */
+  /* Proceed diagonally until you fill the upper right triangle of the table. */
   for (unsigned k = 1; k < str.length(); k++) {
     for (unsigned row = 0, col = k; col < str.length(); row++, col++) {
       if (str[row] == str[col]) {
