@@ -6,10 +6,10 @@ void Foo1 (string name) { // Assume similar definitions for Foo2, Foo3 and Foo4.
 int main() {
   void (*fptr[])(string) {Foo1, Foo2, Foo3, Foo4};
   string names[] {"Nagesh", "Rathna", "Nitin", "Nisha"};
-  
+
   for (unsigned i = 0; i < sizeof(fptr)/sizeof(*fptr); i++)
     fptr[i](names[i]);
-  
+
   return 0;
 }
 Printf format specifiers:
@@ -17,7 +17,7 @@ char - %c, signed char - %hhi, %hhd; unsigned char - %hhu, signed short - %hi, %
 How do you print a turning line on a text console? For instance, the in-place turning line on "Waiting for thread completion...\".
 int main() {
   unsigned int c = 0x5c7c2f2d; // ASCII for \,|,/,-
-  
+
   cout << "Waiting for thread completion...";
 
   for (unsigned i = 0; i < 4000000; i++) {
@@ -75,7 +75,7 @@ int main() {
       cout << item << ' ';
   }
 
-	return 0;
+  return 0;
 }
 
 # Snippet 2:
@@ -103,7 +103,7 @@ int main () {
   adj[3].push_back(1);
 
   adj[11].push_back(3);
-  
+
   // Shorter way of doing this:
   adj[4] = {4,5,6,7};
   adj[2] = {12,9,7};
@@ -111,14 +111,14 @@ int main () {
   adj[3] = {75,1,1};
   adj[11] = {3};
 
-	// An even better way:
-	unordered_map<int, vector<int>> adj = {
-		{4, {4,5,6,7}},
-		{2, {12,9,7}},
-		{7, {0,2}},
-		{3, {75,1,1}},
-		{11, {3}}
-	}
+  // An even better way:
+  unordered_map<int, vector<int>> adj = {
+    {4, {4,5,6,7}},
+    {2, {12,9,7}},
+    {7, {0,2}},
+    {3, {75,1,1}},
+    {11, {3}}
+  }
 
   for (const auto& it : adj) {
     cout << it.first << ": ";
@@ -169,10 +169,10 @@ using namespace std;
 
 int main () {
   unordered_map<int, vector<int>> umap;
-  
+
   umap[4] = {40, 50};
   umap[5] = {50, 60};
-  
+
   for (const auto& item : umap[4])
     cout << item << ' ';
 }
@@ -194,8 +194,11 @@ vector<vector<int>> tbl;
 
 for (int i = 0; i < 5; i++) {
   tbl.push_back({0});
-	
-	for (int j = 1; j < 5; j++) {
-	  tbl[i].push_back(0);
-	}
+
+  for (int j = 1; j < 5; j++) {
+    tbl[i].push_back(0);
+  }
 }
+
+C++ Commandments:
+- Exceptions should never be thrown from a destructor. Write a message to a log file instead. (learncpp.com 14.8)

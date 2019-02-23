@@ -47,8 +47,10 @@ void LPS (const string& str) {
   PrintLPS (str, tbl, 0, str.length() - 1);
 }
 
+// Try agbdba and abba. Especially 'abba'. If you don't
+// account for tbl[i][j] == 0, you'll overrun the tbl buffer.
 int main () {
-  string str = "npuraitinik"; // Try agbdba and abba.
+  string str = "npuraitinik";
 
   LPS (str);
 

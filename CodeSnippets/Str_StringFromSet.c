@@ -1,20 +1,20 @@
 #include <iostream>
 #include <vector>
-#include <string>
 using namespace std;
 
-bool FooWorker (const vector<string>& arr, const string& target, unsigned index) {
+bool FooWorker (const auto& arr, const string& target, unsigned index) {
   for (const string& str : arr) {
 
-    if (target.size() - index >= str.size()) {
+    if (target[index] == str[0]) {
 
       if (target.find(str, index) == index) {
 
-        if (target.size() - index == str.size())
+        if (index + str.length() == target.length())
           return true;
 
-        if (true == FooWorker (arr, target, index + str.size()))
+        if (true == FooWorker (arr, target, index + str.length())) {
           return true;
+        }
       }
     }
   }
@@ -22,7 +22,7 @@ bool FooWorker (const vector<string>& arr, const string& target, unsigned index)
   return false;
 }
 
-bool Foo(const vector<string>& arr, const string& target) {
+bool Foo (const auto& arr, const string& target) {
   return FooWorker (arr, target, 0);
 }
 

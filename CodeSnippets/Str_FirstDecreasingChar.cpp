@@ -4,56 +4,58 @@
 #include <iostream>
 using namespace std;
 
-void FindChar (string& str) {
-  unsigned i = 0;
-  
-  while (i < str.length()) {
-    if ( (str[i] >= 'a' && str[i] <= 'z') ||
-         (str[i] >= 'A' && str[i] <= 'Z') )
-      break;
-    
-    i++;
-  }
-  
-  if (i == str.length()) {
-    cout << "Empty string or no alphabetic characters." << endl;
+char ToUpper (char ch) {
+  if (ch >= 'a' && ch <= 'z')
+    ch = ch - 'a' + 'A';
+
+  return ch;
+}
+
+void FindChar (const string& str) {
+  if (str.length() <= 1) {
+    cout << "Characters are in order." << endl;
     return;
   }
-  
-  if (str[i] >= 'A' && str[i] <= 'Z')
-    str[i] = str[i] - 'A' + 'a';
 
-  unsigned j = i + 1;
-  
-  while (j < str.length()) {
-    if ( (str[j] < 'a' || str[j] > 'z') &&
-         (str[j] < 'A' || str[j] > 'Z') ) {
-      j++;
+  unsigned curr, next;
+
+  for (curr = 0; curr < str.length(); curr++) {
+    if ((str[curr] >= 'a' && str[curr] <= 'z') ||
+        (str[curr] >= 'A' && str[curr] <= 'Z')) {
+      break;
+    }
+  }
+
+  if (curr == str.length()) {
+    cout << "No alphabetic characters." << endl;
+    return;
+  }
+
+  for (next = curr + 1; next < str.length(); next++) {
+    if ( !(str[next] >= 'a' && str[next] <= 'z') &&
+         !(str[next] >= 'A' && str[next] <= 'Z') ) {
       continue;
     }
-    
-    char temp = str[j];
-    
-    if (str[j] >= 'A' && str[j] <= 'Z') {
-      str[j] = str[j] - 'A' + 'a';
-    }
-    
-    if (str[j] < str[i]) {
-      cout << temp << " is the first non-increasing character." << endl;
+
+    char currchar = ToUpper(str[curr]);
+    char nextchar = ToUpper(str[next]);
+
+    if (nextchar <= currchar) {
+      cout << str[next] << " is the first non increasing character." << endl;
       return;
     }
-    
-    i = j++;
+
+    curr = next;
   }
-  
+
   cout << "Characters are in order." << endl;
 }
 
 int main() {
   string str = "ab.C#D..f..E";
   //string str = ".......";
-  
+
   FindChar(str);
-  
+
   return 0;
 }

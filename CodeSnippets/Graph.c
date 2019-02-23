@@ -15,23 +15,23 @@
 // In all, we would have as many such linked lists as there are nodes.
 // Each item in this linked list is represented by 'struct edgenode' below.
 
-// Implement DFS such that we visit each node and each edge once and only once. This needs visited and processed arrays and previous node. Leaving any one of these out will result in some use-case failing. Try with the below graph. Pay attention to how you get to 5 recursively from 2 through 3. You need to process the new edge 5 - 2. Check if 2 is processed, if not then 5 - 2 is a new edge. Process it. As you return from recursive calls, you come to 2 and see the 2 - 5 edge. Check if 5 is processed. Since it is, don't process the edge 2 - 5. This use case doesn't need the previous node. But if you visit 2 from 1 and then look at neighbor 1, then using visited and processed semantics alone won't suffice. You do need the help of 'previous'.
+// Implement DFS such that we visit each node and each edge once and only once. This needs visited and processed arrays and previous node. Leaving any one of these out will result in some use-case failing. Try with the below graph. Pay attention to how you get to 5 recursively from 2 through 3. You need to process the new edge 5 - 2. Check if 2 is processed (note: processed, not just visited), if not then 5 - 2 is a new edge. Process it. As you return from recursive calls, you come to 2 and see the 2 - 5 edge. Check if 5 is processed. Since it is, don't process the edge 2 - 5. This use case doesn't need the previous node. But if you visit 2 from 1 and then look at neighbor 1, then the semantics of visited and processed won't suffice. You do need the help of 'previous', to handle the case of neighbors.
 
 // 1--2--3
 // |  |  |
 // 6  5--4
 
-typedef enum {
+enum state_t {
   undiscovered,
   discovered,
   processed
-} state_t;
+};
 
-typedef enum {
+enum color_t {
   black,
   white,
   uncolored
-} color_t;
+};
 
 // Checking if the graph is bipartite is an application of BFS.
 void Bipartite(graph *g) {
@@ -103,58 +103,10 @@ void dfs(graph *g, int u) {
   state[u] = processed;
   exit[u] = time++;
 }
-
-// Connected components is an application of BFS.
-unsigned Connected_Components (graph *g) {
-  unsigned conn = 0;
-  unsigned i;
-
-  for (i = 1; i <= g->nvertices; i++) {
-    if (state[i] == undiscovered) {
-      conn++;
-      printf("Component %u:", conn);
-      bfs(g, i);
-      printf("\n");
-    }
-  }
-
-  return conn;
-}
-
-// Finding the shortest path from the root to any node is one of the things BFS gives us.
-void FindShortest (int start, int end, int *parent) {
-  if (start == end || end == -1) {
-    printf("%d", start);
-  } else {
-    FindShortest (start, parent[end], parent);
-    printf(" --> %d", end);
-  }
-}
-
-bool AreNeighbors(graph *g, int x, int y) {
-  edgenode *edge;
-
-  if (g == NULL) {
-    printf("Invalid graph.\n");
-    return false;
-  }
-
-  edge = g->edges[x];
-
-  while(edge) {
-    if (edge->y == y) {
-      return true;
-    }
-    edge = edge->next;
-  }
-
-  return false;
-}
 //------------------------------------------------
 #include <iostream>
 #include <set>
 #include <vector>
-#include <climits>
 #include <unordered_map>
 using namespace std;
 
@@ -169,6 +121,7 @@ class Graph {
 
     void _BFS_node(); // Visits every node once. Doesn't visit all edges.
     void _BFS_node_edge(); // Visits every node and edge once.
+		// You cannot use BFS to detect cycles.
 
   public:
     Graph (bool directed = false) : m_directed (directed) {}
@@ -178,10 +131,6 @@ class Graph {
 
       if (m_directed == false)
         adj[v].push_back(u);
-    }
-
-    const auto& GetAdjList () {
-      return adj;
     }
 
     void Print();
@@ -202,7 +151,7 @@ void Graph::Print() {
 
 // Visits every node once. Doesn't visit all edges.
 void Graph::_DFS_node (int u) {
-  static set<int> visited {u};
+  static unordered_set<int> visited {u};
 
   for (const int v : adj[u]) {
 
@@ -218,8 +167,8 @@ void Graph::_DFS_node (int u) {
 
 // Visits every node and edge once.
 void Graph::_DFS_node_edge (int u, int prev) {
-  static set<int> visited {u};
-  static set<int> processed;
+  static unordered_set<int> visited {u};
+  static unordered_set<int> processed;
 
   for (int v : adj[u]) {
     if (v != prev) {
@@ -241,7 +190,7 @@ void Graph::_DFS_node_edge (int u, int prev) {
 
 // Detects if there is a cycle in the graph.
 bool Graph::_DFS_Cycle (int u, int prev) {
-  static set<int> visited {u};
+  static unordered_set<int> visited {u};
 
   for (int v : adj[u]) {
     if (v != prev) {
@@ -304,12 +253,12 @@ void Graph::_BFS_node_edge() {
       // Convince yourself with the above triangular graph diagram that the edge (u,v) is a
       // new edge only if the node v is not processed or if the graph is a directed graph.
       // If node v is processed, then for an undirected graph, you've already processed all edges from v, including edge (v,u).
-      // If node v is only in a discovered state in an undirected graph, then you've reached node v through
-      // some edge other than (u,v). So you can process this new edge (u,v) even if v is in the discovered state.
+      // If node v is only in a visited state in an undirected graph, then you've reached node v through
+      // some edge other than (u,v). So you can process this new edge (u,v) even if v is in the visited state.
       //
       if (processed.find(v) == processed.end() || m_directed) {
         // We satisfy this if-conditional once for every unique edge.
-        // If v is discovered but not processed, it means this edge won't figure in the BFS tree.
+        // If v is visited but not processed, it means this edge won't figure in the BFS tree.
         cout << "Processed edge " << u << "-" << v << endl;
       }
 
@@ -371,4 +320,41 @@ int main () {
   g.DFS();
 
   return 0;
+}
+
+bool AreNeighbors (int u, int v) {
+  for (int node : m_adj[u]) {
+    if (node == v)
+      return true;
+  }
+  
+  return false;
+}
+
+// Finding the shortest path from the root to any node is one of the things BFS gives us.
+// Parent structure can either be a simple array or an unordered_map.
+void FindShortest (int start, int end, auto& parent) {
+  if (start == end)
+    cout << start;
+  else {
+    FindShortest (start, parent[end], parent);
+    cout << " --> " << end;
+  }
+}
+
+bool ConnectedGraph (Graph *g) {
+  int components = 0;
+  unordered_set<int> visited;
+
+  for (const auto& entry : m_adj) {
+    int node = entry->first;
+
+    if (visited.find(node) == visited.end()) {
+      components++;
+
+      BFS (g, node, visited);
+    }
+  }
+
+  return components == 1;
 }
