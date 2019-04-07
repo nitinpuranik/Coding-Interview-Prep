@@ -13,34 +13,26 @@ void LCS (const string& s1, const string& s2) {
   int maxlen = 0;
   int maxindex;
 
-  vector<vector<int>> tbl;
+  vector<vector<int>> arr(s1.length(), vector<int>(s2.length(), 0));
 
-  for (unsigned row = 0; row <= s1.length(); row++)
-    tbl.push_back({0});
-
-  for (unsigned col = 1; col <= s2.length(); col++)
-    tbl[0].push_back(0);
-
-  for (unsigned row = 1; row <= s1.length(); row++) {
-    for (unsigned col = 1; col <= s2.length(); col++) {
-
-      int entry = 0;
-
-      if (s1[row - 1] == s2[col - 1]) {
-        entry = tbl[row - 1][col - 1] + 1;
-
-        if (entry > maxlen) {
-          maxlen = entry;
-          maxindex = row - 1;
+  for (unsigned row = 0; row < s1.length(); row++) {
+    for (unsigned col = 0; col < s2.length(); col++) {
+      if (s1[row] == s2[col]) {
+        if (row == 0 || col == 0)
+          arr[row][col] = 1;
+        else
+          arr[row][col] = arr[row - 1][col - 1] + 1;
+        
+        if (arr[row][col] > maxlen) {
+          maxlen = arr[row][col];
+          maxindex = row;
         }
       }
-
-      tbl[row].push_back(entry);
     }
   }
 
-  for (int index = maxindex - maxlen + 1; index <= maxindex; index++)
-    cout << s1[index];
+  if (maxlen > 0)
+    cout << s1.substr(maxindex - maxlen + 1, maxlen);
 }
 
 int main() {

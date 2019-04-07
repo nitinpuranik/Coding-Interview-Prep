@@ -5,7 +5,7 @@ using namespace std;
 /*
  * Algorithm: Take two strings - say abcm and acm. Recursively check if the last two characters
  * are the same. If they are, then the length of the subsequence is the LCS of the two
- * strings without the last string, plus one. That is, LCS(abcm, acm) = LCS(abc, ac) + 1.
+ * strings without the last character, plus one. That is, LCS(abcm, acm) = LCS(abc, ac) + 1.
  * If the last two characters don't match, LCS(abck, acm) = max(LCS(abck, ac), LCS(abc, acm)).
  */
 
@@ -29,30 +29,23 @@ void LCS (const string& s1, const string& s2) {
     return;
   }
 
-  vector<vector<int>> tbl;
-
-  for (unsigned i = 0; i <= s1.length(); i++)
-    tbl.push_back({0});
-
-  for (unsigned i = 1; i <= s2.length(); i++)
-    tbl[0].push_back(0);
+  vector<vector<int>> arr (s1.length() + 1, vector<int>(s2.length() + 1, 0));
 
   for (unsigned i = 1; i <= s1.length(); i++) {
     for (unsigned j = 1; j <= s2.length(); j++) {
       if (s1[i - 1] == s2[j - 1]) {
-        tbl[i].push_back(tbl[i - 1][j - 1] + 1);
+        arr[i][j] = arr[i - 1][j - 1] + 1;
       } else {
-        int entry = tbl[i - 1][j] > tbl[i][j - 1] ?
-                    tbl[i - 1][j] : tbl[i][j - 1];
-        tbl[i].push_back(entry);
+        arr[i][j] = arr[i][j - 1] > arr[i - 1][j] ?
+                    arr[i][j - 1] : arr[i - 1][j];
       }
     }
   }
 
-  if (tbl[s1.length()][s2.length()] == 0)
+  if (arr[s1.length()][s2.length()] == 0)
     cout << "No LCS" << endl;
 
-  PrintLCS (s1, s2, tbl, s1.length(), s2.length());
+  PrintLCS (s1, s2, arr, s1.length(), s2.length());
   cout << endl;
 
   /*
@@ -64,11 +57,11 @@ void LCS (const string& s1, const string& s2) {
   int row = s1.length();
   int col = s2.length();
 
-  while (tbl[row][col]) {
+  while (arr[row][col]) {
     if (s1[row - 1] == s2[col - 1]) {
       subseq.push_back(s1[row - 1]);
       row--; col--;
-    } else if (tbl[row][col - 1] > tbl[row - 1][col]) {
+    } else if (arr[row][col - 1] > arr[row - 1][col]) {
       col--;
     } else {
       row--;

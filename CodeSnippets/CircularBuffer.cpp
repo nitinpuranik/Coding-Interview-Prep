@@ -20,14 +20,14 @@ bool IsCircular (const vector<int>& arr) {
   unordered_set<int> visited{0};
 
   while(true) {
-    index += arr[index];
+    index = index + arr[index];
 
     if (index < 0) {
-      index = (index * (-1)) % arr.size();
-      index = arr.size() - index;
+      index = abs(index) % arr.size();
+	  index = arr.size() - index;
     }
 
-    index %= arr.size();
+    index = index % arr.size();
 
     if (visited.find(index) != visited.end())
       /* If you don't compare sizes, you will signal
