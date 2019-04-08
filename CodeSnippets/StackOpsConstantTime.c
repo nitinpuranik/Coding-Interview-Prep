@@ -14,61 +14,66 @@
 #include <vector>
 using namespace std;
 
-static vector<int> stack;
-static vector<int> aux;
+class Stack {
+  private:
+    vector<int> stackv;
+    vector<int> minv;
 
-int FindMin () {
-  if (aux.empty())
-    return 0xdeadbeef;
+  public:
+    void Push (int data);
+    int Pop ();
+    int FindMin ();
+    bool Empty() { return stackv.empty(); }
+};
 
-  return aux.back();
+void Stack::Push (int data) {
+  stackv.push_back(data);
+
+  if (minv.empty() || data <= minv.back())
+    minv.push_back(data);
 }
 
-int Pop() {
-  if (stack.empty())
-    return 0xdeadbeef;
+int Stack::Pop () {
+  if (stackv.empty())
+    throw "Stack empty.";
 
-  if (stack.back() == aux.back())
-    aux.pop_back();
+  int data = stackv.back();
+  stackv.pop_back();
 
-  int data = stack.back();
-  stack.pop_back();
+  if (data == minv.back())
+    minv.pop_back();
 
   return data;
 }
 
-void Push (int data) {
-  stack.push_back(data);
-  cout << "Pushed " << data << endl;
+int Stack::FindMin () {
+  if (stackv.empty())
+    throw "Stack empty.";
 
-  if (aux.empty()) {
-    aux.push_back(data);
-    cout << "Also pushed " << data << " onto aux" << endl;
-  } else if (data <= aux.back()) {
-    aux.push_back(data);
-    cout << "Also pushed " << data << " onto aux" << endl;
-  }
+  return minv.back();
 }
 
 int main () {
-  Push (6);
-  Push (15);
-  Push (18);
-  cout << "Minimum is " << FindMin() << endl; // 6
-  Push (5);
-  Push (7);
-  cout << "Minimum is " << FindMin() << endl; // 5
-  cout << "Popped " << Pop() << endl; // Popped 7. 6 - 15 - 18 - 5
-  cout << "Popped " << Pop() << endl; // Popped 5. 6 - 15 - 18
-  cout << "Minimum is " << FindMin() << endl; // 6
-  Push (9);
-  Push (4);
-  Push (12); // 6 - 15 - 18 - 9 - 4 - 12
-  cout << "Minimum is " << FindMin() << endl; // 4
-  cout << "Popped " << Pop() << endl; // Popped 12. 6 - 15 - 18 - 9 - 4
-  cout << "Minimum is " << FindMin() << endl; // 4.
-  cout << "Popped " << Pop() << endl; // Popped 4. 6 - 15 - 18 - 9
-  cout << "Minimum is " << FindMin() << endl; // 6
+  Stack st;
+
+  st.Push (6);
+  st.Push (15);
+  st.Push (18);
+  cout << "Minimum is " << st.FindMin() << endl; // 6
+  st.Push (5);
+  st.Push (7);
+  cout << "Minimum is " << st.FindMin() << endl; // 5
+  cout << "Popped " << st.Pop() << endl; // Popped 7. 6 - 15 - 18 - 5
+  cout << "Popped " << st.Pop() << endl; // Popped 5. 6 - 15 - 18
+  cout << "Minimum is " << st.FindMin() << endl; // 6
+  st.Push (9);
+  st.Push (4);
+  st.Push (12); // 6 - 15 - 18 - 9 - 4 - 12
+  cout << "Minimum is " << st.FindMin() << endl; // 4
+  cout << "Popped " << st.Pop() << endl; // Popped 12. 6 - 15 - 18 - 9 - 4
+  cout << "Minimum is " << st.FindMin() << endl; // 4.
+  cout << "Popped " << st.Pop() << endl; // Popped 4. 6 - 15 - 18 - 9
+  cout << "Minimum is " << st.FindMin() << endl; // 6
 
   return 0;
 }

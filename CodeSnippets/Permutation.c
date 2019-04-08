@@ -1,47 +1,51 @@
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
+#include <unordered_map>
+using namespace std;
 
-void StringPermutationWorker (const char *str, char *resultarray, int *count, int level) {
-  int i;
-  
-  for (i = 0; i < 256; i++) {
-    if (count[i]) {
-      count[i]--;
-      resultarray[level] = i;
-      
-      if (level == strlen(str) - 1) {
-        printf("%s\n", resultarray);
-      } else {
-        StringPermutationWorker (str, resultarray, count, level + 1);
-      }
-      
-      count[i]++;
+// Build a hashmap with the counts of characters. Define a
+// static 'result' variable that will house the permutations.
+// Iterate through the map and add the characters to the result.
+// Decrement the count of the characters as they are added. Once your
+// result array reaches the length of the original string, print it out.
+// Increment back the character once you return from recursive calls.
+
+void StringPermutationWorker (const string& str, unordered_map <char, int>& umap) {
+  static string result;
+
+  for (unordered_map <char, int>::iterator it = umap.begin();
+       it != umap.end(); it++) {
+    if (it->second > 0) {
+      result += it->first;
+      it->second--;
+
+      if (result.length() == str.length())
+        cout << result << endl;
+      else
+        StringPermutationWorker (str, umap);
+
+      it->second++;
+      result.pop_back();
     }
   }
 }
 
-void StringPermutation (const char *str, int n) {
-  char resultarray[n + 1];
-  int count[256];
-  int i;
-  
-  for (i = 0; i < 256; i++) {
-    count[i] = 0;
+void StringPermutation (const string& str) {
+  if (str.empty())
+    return;
+
+  unordered_map <char, int> umap;
+
+  for (unsigned i = 0; i < str.length(); i++) {
+    umap[str[i]]++;
   }
-  
-  resultarray[n] = 0;
-  
-  for (i = 0; i < n; i++) {
-    count[(unsigned char)str[i]]++;
-  }
-  
-  StringPermutationWorker (str, resultarray, count, 0);
+
+  StringPermutationWorker (str, umap);
 }
 
 int main () {
-  char *str = "aabc";
+  string str {"abc"};
 
-  StringPermutation (str, strlen(str));
-  
+  StringPermutation (str);
+
   return 0;
 }

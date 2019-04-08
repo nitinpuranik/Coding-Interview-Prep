@@ -7,12 +7,12 @@ using namespace std;
 // - Move to the top: Delete the row character.
 // - Move diagonally across, no change in value: No-op. Characters are the same.
 // - Move diagonally across, value decrements: Substitute row with column character.
-void Print(const auto& tbl, const string& s1, const string& s2, int row, int col) {
+void Print(const vector<vector<int>>& tbl, const string& s1, const string& s2, int row, int col) {
   if (tbl[row][col]) {
     if (s1[row - 1] == s2[col - 1]) {
       Print(tbl, s1, s2, row - 1, col - 1);
     } else {
-      unsigned min = tbl[row][col - 1] < tbl[row - 1][col] ?
+      int min = tbl[row][col - 1] < tbl[row - 1][col] ?
                 tbl[row][col - 1] : tbl[row - 1][col];
       min = min < tbl[row - 1][col - 1] ? min : tbl[row - 1][col - 1];
 
@@ -30,43 +30,44 @@ void Print(const auto& tbl, const string& s1, const string& s2, int row, int col
   }
 }
 
-unsigned int MinEdit (const string& s1, const string& s2) {
+int MinEdit (const string& s1, const string& s2) {
   // abc -> akcd. abc will figure vertically in rows and akcd horizontally in columns.
   // So you'll have 4 rows and 5 columns, one extra entry for NULL.
 
   // Check for edge cases. If one of the strings is NULL, the
   // minimum edit distance is the length of the other string.
   if (s1.empty() || s2.empty()) {
-    return s1.empty() ? s2.size() : s1.size();
+    return s1.length() > 0 ? s1.length() : s2.length();
   }
 
-  vector<vector<unsigned>> tbl;
+  vector<vector<int>> arr (s1.length() + 1, vector<int> (s2.length() + 1, 0));
 
-  // Initialize the first column equal to the length of the vertical substring.
-  for (unsigned row = 0; row <= s1.length(); row++) {
-    tbl.push_back({row});
+  for (unsigned i = 1; i <= s1.length(); i++) {
+    arr[i][0] = i;
   }
 
-  // Initialize the first row equal to the length of the horizontal substring.
-  for (unsigned col = 1; col <= s2.length(); col++) {
-    tbl[0].push_back(col);
+  for (unsigned i = 1; i <= s2.length(); i++) {
+    arr[0][i] = i;
   }
 
-  for (unsigned row = 1; row <= s1.length(); row++) {
-    for (unsigned col = 1; col <= s2.length(); col++) {
-      if (s1[row - 1] == s2[col - 1]) {
-        tbl[row].push_back(tbl[row - 1][col - 1]);
-      } else {
-        unsigned min = tbl[row][col - 1] < tbl[row - 1][col] ?
-                  tbl[row][col - 1] : tbl[row - 1][col];
-        min = min < tbl[row - 1][col - 1] ? min : tbl[row - 1][col - 1];
-        tbl[row].push_back(min + 1);
+  for (unsigned i = 1; i <= s1.length(); i++) {
+    for (unsigned j = 1; j <= s2.length(); j++) {
+      arr[i][j] = arr[i - 1][j - 1];
+
+      if (s1[i - 1] != s2[j - 1]) {
+        if (arr[i][j - 1] < arr[i][j])
+          arr[i][j] = arr[i][j - 1];
+
+        if (arr[i - 1][j] < arr[i][j])
+          arr[i][j] = arr[i - 1][j];
+
+        arr[i][j]++;
       }
     }
   }
 
-  Print(tbl, s1, s2, s1.length(), s2.length());
-  return tbl[s1.length()][s2.length()];
+  Print(arr, s1, s2, s1.length(), s2.length());
+  return arr[s1.length()][s2.length()];
 }
 
 int main() {
@@ -85,39 +86,39 @@ int main() {
 #include <vector>
 using namespace std;
 
-bool OneEditApart(string& s1, string& s2) {
-  string& bigger = s1;
-  string& smaller = s2;
+bool OneEditApart (const string& s1, const string& s2) {
+  if (s1 == s2)
+    return false;
 
-  // Determine the bigger and smaller string.
-  // We're covered even if the strings are identical in length.
-  if (s1.length() < s2.length()) {
-    smaller = s1;
-    bigger = s2;
-  }
-
-  if (bigger.length() - smaller.length() > 1)
+  if (abs(int(s1.length() - s2.length())) > 1)
     return false;
 
   // A boolean to track if we saw a difference.
   bool sawdiff = false;
 
-  for (unsigned i = 0,j = 0; i < smaller.length(); i++, j++) {
-    if (smaller[i] != bigger[j]) {
+  for (unsigned i = 0, j = 0; i < s1.length() && j < s2.length();) {
+    if (s1[i] == s2[j]) {
+      i++; j++;
+    }
 
+    else if (sawdiff == true)
+        return false;
+
+    else {
       // We've seen a difference before. If we see a difference
       // again, then the edit distance exceeds one. Return false.
-      if (sawdiff == true) return false;
-
       sawdiff = true;
 
-      // Reason for the below i-- decrement:
+      // Reason for the below selective increment:
       // Take for instance 'akc' and 'k'. You check 'a' and 'k'.
       // They're dissimilar. That is one new addition in the smaller
       // string. Now move to the next character in the longer string
       // but stay at the same character in the smaller string. So the
-      // below decrement.
-      i--;
+      // below increment in the bigger string.
+      if (s1.length() > s2.length())
+        i++;
+      else
+        j++;
     }
   }
 
@@ -126,7 +127,7 @@ bool OneEditApart(string& s1, string& s2) {
   // sawdiff is still false. This happens if the smaller string
   // is the leftmost substring of the bigger string, falling short
   // of only one character at the very last. "abcde" and "abcd" for example.
-  return sawdiff || bigger.length() == smaller.length() + 1;
+  return sawdiff || s1.length() != s2.length();
 }
 
 int main() {
