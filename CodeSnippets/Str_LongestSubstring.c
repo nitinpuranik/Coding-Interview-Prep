@@ -72,33 +72,40 @@ void LongestSubstring (const string& str, int k) {
   if (str.empty() || k < 1)
     return;
 
-  int maxlen = 1;
-  int maxindex = 0;
-  int s[str.length()] {1};
-  unordered_map<char, int> count {{str[0], 1}};
+  unsigned start = 0, end = 0;
+  int max = 1, idx = 0;
+  int curr = 0;
 
-  for (unsigned i = 1; i < str.length(); i++) {
-    s[i] = s[i - 1] + 1;
-    count[str[i]]++;
+  unordered_map<char, int> umap;
 
-    if (count[str[i]] > k) {
-      for (unsigned j = i - s[i] + 1; j < i; j++) {
-        s[i]--;
-        count[str[j]]--;
+  for (; end < str.length(); end++) {
+    umap[str[end]]++;
+    curr++;
 
-        if (str[j] == str[i]) {
+    if (umap[str[end]] > k) {
+      if (max < curr - 1) {
+        max = curr - 1;
+        idx = start;
+      }
+
+      while (start < end) {
+        umap[str[start]]--;
+        curr--;
+
+        if (str[start] == str[end]) {
+          start++;
           break;
         }
-      }
-    }
 
-    /* < gives the leftmost occurrence. <= gives the rightmost occurrence. */
-    if (maxlen <= s[i]) {
-      maxlen = s[i];
-      maxindex = i;
+        start++;
+      }
     }
   }
 
-  for (int i = maxindex - maxlen + 1; i <= maxindex; i++)
-    cout << str[i];
+  if (max < curr) {
+    max = curr;
+    idx = start;
+  }
+
+  cout << str.substr (idx, max);
 }

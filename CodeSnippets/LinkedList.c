@@ -15,7 +15,7 @@ void Print (Node *node) {
   cout << endl;
 }
 
-void Insert (Node **head, long data) {
+void Insert (Node **head, int data) {
   if (head) {
     Node *newnode = new (nothrow) Node {data, *head};
 
@@ -24,7 +24,7 @@ void Insert (Node **head, long data) {
   }
 }
 
-unsigned int Count (Node *list, long data) {
+unsigned int Count (Node *list, int data) {
   unsigned count {0};
 
   while (list) {
@@ -37,7 +37,7 @@ unsigned int Count (Node *list, long data) {
   return count;
 }
 
-long GetNth (Node *node, int index) {
+int GetNth (Node *node, int index) {
   while (node && index > 0) {
     node = node->next;
     index--;
@@ -63,11 +63,11 @@ void DeleteList (Node **node) {
   }
 }
 
-long Pop (Node **head) {
+int Pop (Node **head) {
   if (head == nullptr || *head == nullptr)
     return 0xdeadbeef;
 
-  long data = (*head)->data;
+  int data = (*head)->data;
   Node *node = *head;
 
   *head = (*head)->next;
@@ -76,7 +76,7 @@ long Pop (Node **head) {
   return data;
 }
 
-void Insert (Node **head, long index, long data) {
+void Insert (Node **head, int index, int data) {
   if (head == nullptr || index < 0)
     return;
 
@@ -227,6 +227,27 @@ void AlternatingSplit (Node *source, Node **aRef, Node **bRef) {
 
     count ^= 1;
   }
+
+  // Alternate way of doing this:
+  if (source == nullptr || aRef == nullptr || bRef == nullptr)
+    return;
+
+  Node *slow = source;
+  Node *fast = source->next;
+
+  while (fast && fast->next) {
+    Node *slownode = slow->next->next;
+    Node *fastnode = fast->next->next;
+
+    MoveNode (aRef, slow);
+    MoveNode (bRef, fast);
+
+    slow = slownode;
+    fast = fastnode;
+  }
+
+  if (fast == nullptr)
+    MoveNode (aRef, slow);
 }
 
 Node* ShuffleMerge (Node *a, Node *b) {

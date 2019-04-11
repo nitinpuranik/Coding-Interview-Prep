@@ -11,65 +11,50 @@
 #include <vector>
 using namespace std;
 
-unordered_map<char, vector<char>> m_nearby;
+unordered_map<char, vector<char>> nchars;
 unordered_set<string> words {"jello", "jelly", "gekko", "gimme", "jimmy"};
 
-void Init () {
-  m_nearby.insert({'h', {'j','g'}});
-  m_nearby.insert({'e', {'i'}});
-  m_nearby.insert({'l', {'m', 'k'}});
-  m_nearby.insert({'o', {'y', 'e', 's'}});
+void Init() {
+  nchars['h'] = {'j','g'};
+  nchars['e'] = {'i'};
+  nchars['l'] = {'m', 'k'};
+  nchars['o'] = {'y', 'e', 's'};
 }
 
-vector<char> nearby_chars (char c) {
-  if (m_nearby.find(c) != m_nearby.end())
-    return m_nearby[c];
+void Print (const string& str, vector<string>& vnearby) {
+  static string res {str};
+  static unsigned index = 0;
 
-  return vector<char>();
-}
+  if (index == str.length()) {
+    if (words.find(res) != words.end())
+      vnearby.push_back (res);
 
-bool IsWord (const string& str) {
-  return words.find(str) != words.end();
-}
-
-void PrintNearby (string& str, auto& vnearby) {
-  static unsigned idx = 0;
-
-  if (str.empty() || idx >= str.length())
     return;
-
-  vector<char> c_nearby = nearby_chars(str[idx]);
-  c_nearby.push_back(str[idx]);
-
-  char orig = str[idx];
-
-  for (char ch : c_nearby) {
-    str[idx] = ch;
-
-    if (IsWord(str)) {
-      vnearby.insert(str);
-    }
-
-    idx++;
-    PrintNearby (str, vnearby);
-
-    idx--;
   }
 
-  str[idx] = orig;
+  index++;
+  Print (str, vnearby);
+  index--;
+
+  for (char ch : nchars[str[index]]) {
+    res[index] = ch;
+
+    index++;
+    Print (str, vnearby);
+    index--;
+  }
+
+  res[index] = str[index];
 }
 
 int main() {
-  string str {"hello"};
-  unordered_set<string> vnearby;
-
   Init();
 
-  PrintNearby (str, vnearby);
+  vector<string> vnearby;
+  Print ("hello", vnearby);
 
   for (const string& str : vnearby)
     cout << str << ' ';
-  cout << endl;
 
   return 0;
 }
