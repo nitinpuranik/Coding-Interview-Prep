@@ -228,26 +228,15 @@ void AlternatingSplit (Node *source, Node **aRef, Node **bRef) {
     count ^= 1;
   }
 
-  // Alternate way of doing this:
+  // Alternate, advanced way of doing this:
   if (source == nullptr || aRef == nullptr || bRef == nullptr)
     return;
 
-  Node *slow = source;
-  Node *fast = source->next;
-
-  while (fast && fast->next) {
-    Node *slownode = slow->next->next;
-    Node *fastnode = fast->next->next;
-
-    MoveNode (aRef, slow);
-    MoveNode (bRef, fast);
-
-    slow = slownode;
-    fast = fastnode;
+  while (source) {
+    // This works because MoveNode takes care of moving your source pointer forward.
+    MoveNode (aRef, &source);
+    MoveNode (bRef, &source);
   }
-
-  if (fast == nullptr)
-    MoveNode (aRef, slow);
 }
 
 Node* ShuffleMerge (Node *a, Node *b) {
@@ -274,43 +263,86 @@ Node* ShuffleMerge (Node *a, Node *b) {
   return mergelist;
 }
 
-Node* SortedMerge (Node *a, Node *b) {
-  if (a == nullptr)
-    return b;
-  else if (b == nullptr)
-    return a;
+// If using the above MoveNode, then your ShuffleMerge would look like this:
+Node* ShuffleMerge (Node *a, Node *b) {
+  Node *shuffle = nullptr;
 
-  Node *mergelist;
-
-  if (a->data < b->data) {
-    mergelist = a;
-    a = a->next;
-  } else {
-    mergelist = b;
-    b = b->next;
+  while (a && b) {
+    MoveNode (&shuffle, &a);
+    MoveNode (&shuffle, &b);
   }
 
-  Node *curr = mergelist;
+  while (a)
+    MoveNode (&shuffle, &a);
+
+  while (b)
+    MoveNode (&shuffle, &b);
+
+  return shuffle;
+}
+
+// A real cool recursive way of ShuffleMerge is here:
+Node *ShuffleMerge (Node *a, Node *b) {
+  if (a == nullptr || b == nullptr)
+    return a ? a : b;
+
+  b->next = ShuffleMerge (a->next, b->next);
+  a->next = b;
+
+  return a;
+}
+
+Node *SortedMerge (Node *a, Node *b) {
+  if (a == nullptr || b == nullptr)
+    return a ? a : b;
+
+  Node *merge = nullptr, *tail = nullptr;
+  Node *curr = nullptr;
 
   while (a && b) {
     if (a->data < b->data) {
-      curr->next = a;
+      curr = a;
       a = a->next;
-      curr = curr->next;
     } else {
-      curr->next = b;
+      curr = b;
       b = b->next;
-      curr = curr->next;
     }
+
+    if (merge == nullptr) {
+      merge = tail = curr;
+    } else {
+      tail->next = curr;
+      tail = curr;
+    }
+
+    curr->next = nullptr;
   }
 
-  if (a) {
-    curr->next = a;
-  } else {
-    curr->next = b;
+  if (a || b) {
+    tail->next = a ? a : b;
   }
 
-  return mergelist;
+  return merge;
+}
+
+// Cool recursive SortedMerge
+Node *SortedMerge (Node *a, Node *b) {
+  if (a == nullptr || b == nullptr)
+    return a ? a : b;
+
+  if (a->data < b->data) {
+    b->next = SortedMerge (a->next, b->next);
+    a->next = b;
+
+    return a;
+  }
+
+  else {
+    a->next = SortedMerge (a->next, b->next);
+    b->next = a;
+
+    return b;
+  }
 }
 
 void MergeSort(Node **headRef) {
@@ -393,6 +425,27 @@ void RecursiveReverse (Node **headRef) {
   *headRef = nullptr;
 
   RecursiveReverseWorker (headRef, node);
+}
+
+// Another recursive reverse implementation.
+Node* ReverseWorker (Node **a, Node *node) {
+  if (node->next == nullptr) {
+    *a = node;
+    return node;
+  }
+
+  Node *revnode = ReverseWorker (a, node->next);
+  revnode->next = node;
+
+  return node;
+}
+
+void Reverse (Node **a) {
+  if (a == nullptr || *a == nullptr || (*a)->next == nullptr)
+    return;
+
+  Node *lastnode = ReverseWorker (a, *a);
+  lastnode->next = nullptr;
 }
 
 // ===========================================================
