@@ -49,11 +49,6 @@ Commit these to your memory:
 Dictionary operations: Insert(D,x), Search(D,k), Delete(D,x). Optional operations: Min/Max(D), Predecessor/Successor(D,x). Min/Max are priority queue operations.
 Priority Queue: Insert(Q,x), Min/Max(Q), DeleteMin/Max(Q)
 ======================================================
-***OpenSource Projects:
-libsvm (C++), memcached (small project, C, dive in!)
-libevent (C) - Developed by Niels Provos, lighttpd (small, C)
-HAProxy - The fastest load balancer. Written in C.
-======================================================
 C++:
 How do you define a class and still prohibit users from creating instance of the class? Answer - By making the class constructor protected. This lets derived classes inherit this class and create instances of the derived class, while still being able to initialize the base portion of the derived object.
 You can bind a const reference to an r-value. You cannot bind a non-const reference to an r-value. int& val = 5; // Doesn't work. const int& val = 5; // Works.
