@@ -115,20 +115,17 @@ Node* Successor (Node *node) {
 
   // Has a right subtree. Return leftmost child.
   if (node->right) {
-    Node *child = node->right;
+    node = node->right;
 
-    while (child->left) {
-      child = child->left;
+    while (node->left) {
+      node = node->left;
     }
 
-    return child;
+    return node;
   }
 
-  // No right subtree. If node is left child of parent, return parent.
-  if (node->parent && node->parent->left == node) {
-    return node->parent;
-  }
-
+  // No right subtree. If node is right child of parent, return ancestor.
+  // Else return parent. If parent doesn't exist, you'll simply return nullptr.
   while (node->parent && node->parent->right == node) {
     node = node->parent;
   }
@@ -224,15 +221,12 @@ bool PrintMaxPathSum (Node *node, int sum) {
        * the 'return true' statement. */
       return true;
     }
-
-    pathvec.pop_back();
-    return false;
   }
 
-  if (PrintMaxPathSum (node->left, sum - node->data))
+  else if (PrintMaxPathSum (node->left, sum - node->data))
     return true;
 
-  if (PrintMaxPathSum (node->right, sum - node->data))
+  else if (PrintMaxPathSum (node->right, sum - node->data))
     return true;
 
   pathvec.pop_back();
