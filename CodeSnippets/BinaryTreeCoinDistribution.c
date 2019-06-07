@@ -31,13 +31,26 @@ void Insert (Node *node, int val, dir_t dir) {
     node->right = newnode;
 }
 
-int BalanceTreeWorker (Node *node, int *totalcost) {
+int CoinDistroWorker (Node *node, int *totalcost) {
   if (node == nullptr)
     return 0;
 
-	// Coins available in the left and right subtree.
-  int lcredit = BalanceTreeWorker (node->left, totalcost);
-  int rcredit = BalanceTreeWorker (node->right, totalcost);
+  // Optimization. Don't need to call left and right for leaf nodes.
+  // Pop-quiz: Why do you not need to update totalcost for leaves? Because
+  // when you're at a leaf node, there are no coin movements needed.
+  // Only when you get to the inner nodes, will you need to move coins
+  // back and forth between leaves and internal nodes.
+  if (node->left == nullptr && node->right == nullptr)
+    return node->data - 1;
+
+	// Coins available in the left and right subtree. Optimize so you call functions only if children exist.
+  int lcredit = 0, rcredit = 0;
+
+  if (node->left)
+    lcredit = CoinDistroWorker (node->left, totalcost);
+
+  if (node->right)
+    rcredit = CoinDistroWorker (node->right, totalcost);
 
 	// Here we take the absolute values of coins because a +1
 	// means a coin is being given out and a -1 means a coin is
@@ -49,13 +62,13 @@ int BalanceTreeWorker (Node *node, int *totalcost) {
   return lcredit + rcredit + node->val - 1;
 }
 
-int BalanceTree (Node *node) {
+int CoinDistro (Node *node) {
 	// This variable goes on cumulatively summing up the absolute values
 	// of coins available. This gives us the total number of moves needed
 	// or the 'cost' of distribution.
   int totalcost = 0;
 
-  BalanceTreeWorker (node, &totalcost);
+  CoinDistroWorker (node, &totalcost);
 
   return totalcost;
 }
@@ -67,5 +80,5 @@ int main () {
   Insert(node, 0, e_right);
   Insert(node->left, 3, e_right);
 
-  cout << BalanceTree (node);
+  cout << CoinDistro (node);
 }

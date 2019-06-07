@@ -74,38 +74,41 @@ void PrintRange (Node *node, int min, int max) {
   }
 }
 
-int IsBalancedWorker (TreeNode* node, bool *bal) {
-  if (node == nullptr)
-    return 0;
-
-  int ldepth = IsBalancedWorker (node->left, bal);
-
-  if (*bal == false)
-    return 0;
-
-  int rdepth = IsBalancedWorker (node->right, bal);
-
-  if (*bal == false)
-    return 0;
-
-  if (ldepth > rdepth + 1 || rdepth > ldepth + 1) {
-    cout << "Imbalanced at " << node->data << endl;
-    *bal = false;
-    return 0;
-  }
-
-  return ldepth > rdepth ? ldepth + 1 : rdepth + 1;
-}
-
 bool IsBalanced (Node *node) {
+  static int count = 0;
+  static int min = -1, max = -1;
+
   if (node == nullptr)
     return true;
 
-  bool bal = true;
+  count++;
 
-  IsBalancedWorker (node, &bal);
+  if (node->left == nullptr && node->right == nullptr) {
+    if (min < 0 && max < 0) {
+      min = max = count;
+    }
 
-  return bal;
+    else if (abs(min - count) > 1 || abs (max - count) > 1) {
+      return false;
+    }
+
+    else if (count < min) {
+      min = count;
+    }
+
+    else if (count > max) {
+      max = count;
+    }
+  }
+
+  else if (IsBalanced(node->left) == false)
+    return false;
+
+  else if (IsBalanced(node->right) == false)
+    return false;
+
+  count--;
+  return true;
 }
 
 Node* Successor (Node *node) {
@@ -162,41 +165,37 @@ Node* Duplicate (Node *node) {
 
 /* Return the max path sum between any two leaves in the tree. */
 int MaxPathSumTwoLeavesWorker (Node *node, int *max) {
-  if (node == nullptr)
-    return INT32_MIN;
-
   if (node->left == nullptr && node->right == nullptr)
     return node->data;
 
-  int lsum, rsum;
-  lsum = MaxPathSumTwoLeavesWorker (node->left, max);
-  rsum = MaxPathSumTwoLeavesWorker (node->right, max);
+  if (node->right == nullptr)
+    return MaxPathSumTwoLeavesWorker (node->left) + node->data;
 
-  if (lsum > INT32_MIN && rsum > INT32_MIN) {
-    if (lsum + node->data + rsum > *max) {
-      *max = lsum + node->data + rsum;
-    }
+  if (node->left == nullptr)
+    return MaxPathSumTwoLeavesWorker (node->right) + node->data;
 
-    return lsum > rsum ? lsum + node->data : rsum + node->data;
+  int lsum = MaxPathSumTwoLeavesWorker (node->left, max);
+  int rsum = MaxPathSumTwoLeavesWorker (node->right, max);
+
+  if (lsum + node->data + rsum > *max) {
+    *max = lsum + node->data + rsum;
   }
 
-  if (lsum > INT32_MIN)
-    return lsum + node->data;
-  else
-    return rsum + node->data;
+  return lsum > rsum ? lsum + node->data : rsum + node->data;
 }
 
 /* Return the max path sum between any two leaves in the tree. Worker function above. */
 int MaxPathSumTwoLeaves (Node *node) {
   if (node == nullptr)
-    return INT32_MIN;
-
-  if (node->left == nullptr && node->right == nullptr)
-    return node->data;
+    throw "Invalid input.";
 
   int max = INT32_MIN;
-  int ret = MaxPathSumTwoLeavesWorker (node, &max);
-  return ret > max ? ret : max;
+  MaxPathSumTwoLeavesWorker (node, &max);
+
+  if (max == INT32_MIN)
+    throw "Only one leaf present in the tree.";
+
+  return max;
 }
 
 /* Returning a bool helps in ending your search once you find the
@@ -236,19 +235,16 @@ bool PrintMaxPathSum (Node *node, int sum) {
 /* This will return 10 if presented with the above 8-4-(-2) tree. */
 int MaxSumRootToLeaf (Node *node) {
   if (node == nullptr)
-    /*
-     * This return value is the only difference between the above function
-     * and this function. Returning 0 will give you the maximum between root
-     * and any node including a non-leaf node. Returning INT32_MIN will give
-     * you the maximum between root and a leaf. This little subtlety makes a
-     * difference only if the tree contains negatives. It won't matter if there
-     * are all positives in the tree.
-     */
-    return INT32_MIN;
+    throw "Empty input.";
 
-  if (node->left == nullptr && node->right == nullptr) {
+  if (node->left == nullptr && node->right == nullptr)
     return node->data;
-  }
+
+  if (node->right == nullptr)
+    return MaxSumRootToLeaf (node->left) + node->data;
+
+  if (node->left == nullptr)
+    return MaxSumRootToLeaf (node->right) + node->data;
 
   int lsum = MaxSumRootToLeaf (node->left);
   int rsum = MaxSumRootToLeaf (node->right);
@@ -277,7 +273,7 @@ int MaxDepth(Node *node) {
 
 int MinValue (Node *node) {
   if (node == nullptr) {
-    return 0xdeadbeef;
+    throw "Empty tree.";
   }
 
   if (node->left == nullptr) {
@@ -286,7 +282,6 @@ int MinValue (Node *node) {
 
   return MinValue(node->left);
 }
-
 void Print(Node *node) {
   if (node) {
     Print(node->left);
@@ -295,16 +290,13 @@ void Print(Node *node) {
   }
 }
 
-/* This is slightly tricky. Check your implementation for the below tree and sum 8.
-    5
-   / \
-  3   7
- /     \
-1       9
- \
-  2*/
+/* This is slightly tricky. Check your implementation for the below tree and sum 0.
+      5
+     /
+    3
+*/
 bool hasPathSum(Node *node, int sum) {
-  // This condition is necessary because if you instead check if (node == nullptr && data == 0), you'll fail for the above tree with sum 8.
+  // This condition is necessary because if you instead check if (node == nullptr && data == 0), you'll fail for the above tree with sum 5.
   if (node == nullptr) {
     return false;
   }
@@ -362,11 +354,8 @@ void DoubleTree (Node *node) {
 }
 
 bool SameTree (Node *a, Node *b) {
-  if (a == nullptr && b == nullptr)
-    return true;
-
   if (a == nullptr || b == nullptr)
-    return false;
+    return a == b;
 
   return (a->data == b->data)       &&
          SameTree(a->left, b->left) &&
@@ -381,32 +370,16 @@ bool IsBSTWorker(Node *node, int min, int max) {
     return false;
   }
 
+  // Leaf node optimization. You'll save (#leaves * 2) calls.
+  if (node->left == nullptr && node->right == nullptr)
+    return true;
+
   return IsBSTWorker(node->left, min, node->data) &&
          IsBSTWorker(node->right, node->data + 1, max);
 }
 
-void MinMaxValues(Node *node, int *min, int *max) {
-  if (node == nullptr)
-    return;
-
-  if (node->data < *min) {
-    *min = node->data;
-  } else if (node->data > *max) {
-    *max = node->data;
-  }
-
-  MinMaxValues(node->left, min, max);
-  MinMaxValues(node->right, min, max);
-}
-
 bool IsBST(Node *node) {
-  int min, max;
-  if (node == nullptr)
-    return true;
-
-  min = max = node->data;
-  MinMaxValues(node, &min, &max);
-  return IsBSTWorker(node, min, max);
+  return IsBSTWorker(node, INT32_MIN, INT32_MAX);
 }
 
 bool IsBST (Node *node) {
@@ -423,7 +396,21 @@ bool IsBST (Node *node) {
 
   lastdata = node->data;
 
+  //*********************
+  // This block doesn't handle it and fails if you have root=5 and right child=5.
+  // See that case handled in the following block.
   return IsBST (node->right);
+  //*********************
+
+  //*********************
+  // This block handles it if you have root=5 and right child=5.
+  if (node->right) {
+    lastdata++;
+    return IsBST (node->right);
+  }
+
+  return true;
+  //*********************
 }
 
 /* Check if the given expression is a valid tertiary expression.

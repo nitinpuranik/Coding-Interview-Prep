@@ -11,14 +11,16 @@ int Read (char *buf, int n) {
   while (n > 0) {
     int bytes = Read4K(aux);
 
-    if (bytes == 0)
-      break;
-
-    bytes = n < bytes ? n : bytes;
+    if (n < bytes)
+      bytes = n;
 
     memcpy (buf + totalbytes, aux, bytes);
 
     totalbytes += bytes;
+
+    if (bytes < 4096)
+      break;
+
     n -= bytes;
   }
 

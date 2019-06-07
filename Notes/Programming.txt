@@ -191,6 +191,11 @@ priority_queue<int, vector<int>, greater<int>> pq; // Gives you a min heap.
 vector<vector<int>> (5, vector<int>(5, 0));
 
 #Snippet 8:
+Locking: https://codereview.stackexchange.com/questions/141434/c-thread-safe-queue-implementation
+std::mutex mtx;
+std::unique_lock<std::mutex> lock(mtx); // Lock when required.
+lock.unlock(); // Unlock when done.
+std::lock_guard<std::mutex> lock(mtx); // Locking with RAII. Will be unlocked when lock goes out of scope.
 Work through https://www.geeksforgeeks.org/multithreading-in-cpp/
 void foo(int val) { cout << "Foo: " << val << endl; } // Alternative 1
 auto foo = [] (int val) { cout << "Foo: " << val << endl; }; // Alternative 2
