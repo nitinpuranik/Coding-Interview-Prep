@@ -203,3 +203,19 @@ auto foo = [] (int val) { cout << "Foo: " << val << endl; }; // Alternative 2
 int main() { thread t(foo, 5); t.join(); return 0; }
 
 Or, call directly using lambda expression: thread t ([] (int val) { cout << "Foo: " << val << endl; }, 5);
+===========================================================================================================
+https://sourcemaking.com/design_patterns/factory_method
+https://www.cs.umb.edu/~poneil/lsmtree.pdf
+https://eng.uber.com/tech-stack-part-one/
+https://eng.uber.com/soa/; https://eng.uber.com/engineering-an-efficient-route/
+C++ Keywords: override, final, two phase commit, abstract class.
+https://www.facebook.com/careers/life/sample_interview_questions/?redirect_id=Af_UIcZcwaEsmmqLR3OswnWtv5UW4r2mP-aZGVOD39AdxZZz_U-KwkjEeDXK9vxihTI&loop_id=Af_bYJGmkmEk2hYV-nMjhnNdl5np45nmteyX3DRl14dGnUSAIK7m4RGH3rXjor6GhGo
+
+Imagine you are given 10,000 files each containing 1 Million integers. I would you sum all of them and give the final result?
+Multiple issues:
+1) Performance - assuming 1M numbers to be added take 10ms. Doing sequential summing on a single machines means 10000*10=100s. Too bad.
+2) Overflow - Here total are 10Bill integers, cant bank on max int limit of ~2.15Bill. Long is safer @ max of 9.2BillBill. Best is go for BigInteger. Can also go with long as it can be faster....so decide the trade off based on data range.
+3) Beware of OOM due to heap size limits. With ints, each data set is 4MB+(4B per int + object overhead), with longs ~16MB . For BigInteger plan more, as it internally uses int[].
+
+So assuming max heap configured at 8GB, assuming 50% is available for you ...so you can process (4GB/16MB) ~250 files per node in a multi-threaded implementation, needed 40 nodes. 
+Assuming each node takes 20-30ms to do the job. Have workers/jobs to delegate job to 20 machines with file paths(each machine can read the target files directly from a central mount location). Kick them off in parallel. Sum up the 40 results...each taking 20-30ms each... account for say 2-5ms of network latency...you can get final answer in ~35-40ms. Optimize further as per your perf SLA.
