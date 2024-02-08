@@ -141,13 +141,11 @@ void InsertSort(Node **head) {
 }
 
 void Append (Node **A, Node **B) {
-  Node *curr;
-
   if (A == nullptr || B == nullptr || *B == nullptr) {
     return;
   }
 
-  curr = *A;
+  Node *curr = *A;
 
   while (curr && curr->next) {
     curr = curr->next;
@@ -240,27 +238,21 @@ void AlternatingSplit (Node *source, Node **aRef, Node **bRef) {
 }
 
 Node* ShuffleMerge (Node *a, Node *b) {
-  if (a == nullptr)
-    return b;
-  else if (b == nullptr)
-    return a;
+	Node head {0xdead, nullptr};
+	Node *tail (&head);
 
-  Node *mergelist = a;
+	while (a && b) {
+		tail->next = a;
+		tail = a;
+		a = a->next;
 
-  while (a && a->next && b) {
-    Node *bnext = b->next;
+		tail->next = b;
+		tail = b;
+		b = b->next;
+	}
 
-    b->next = a->next;
-    a->next = b;
-
-    a = b->next;
-    b = bnext;
-  }
-
-  if (a->next == nullptr)
-    a->next = b;
-
-  return mergelist;
+	tail->next = a ? a : b;
+	return head.next;
 }
 
 // If using the above MoveNode, then your ShuffleMerge would look like this:
@@ -292,37 +284,23 @@ Node *ShuffleMerge (Node *a, Node *b) {
   return a;
 }
 
-Node *SortedMerge (Node *a, Node *b) {
-  if (a == nullptr || b == nullptr)
-    return a ? a : b;
+Node* SortedMerge (Node* a, Node* b) {
+    Node head {0xffff, nullptr};
+    Node* tail {&head};
 
-  Node *merge = nullptr, *tail = nullptr;
-  Node *curr = nullptr;
-
-  while (a && b) {
-    if (a->data < b->data) {
-      curr = a;
-      a = a->next;
-    } else {
-      curr = b;
-      b = b->next;
+    while (a && b) {
+        if (a->data <= b->data) {
+            tail->next = a;
+            a = a->next;
+        } else {
+            tail->next = b;
+            b = b->next;
+        }
+        tail = tail->next;
     }
 
-    if (merge == nullptr) {
-      merge = tail = curr;
-    } else {
-      tail->next = curr;
-      tail = curr;
-    }
-
-    curr->next = nullptr;
-  }
-
-  if (a || b) {
     tail->next = a ? a : b;
-  }
-
-  return merge;
+    return head.next;
 }
 
 // Cool recursive SortedMerge
@@ -333,14 +311,10 @@ Node *SortedMerge (Node *a, Node *b) {
   if (a->data < b->data) {
     b->next = SortedMerge (a->next, b->next);
     a->next = b;
-
     return a;
-  }
-
-  else {
+  } else {
     a->next = SortedMerge (a->next, b->next);
     b->next = a;
-
     return b;
   }
 }
@@ -358,13 +332,11 @@ void MergeSort(Node **headRef) {
 }
 
 void Push (Node **headRef, int data) {
-  Node *newnode;
-
   if (headRef == nullptr) {
     return;
   }
 
-  newnode = new Node {data, *headRef};
+  Node* newnode = new Node {data, *headRef};
   *headRef = newnode;
 }
 
@@ -391,20 +363,21 @@ Node* SortedIntersect (Node *a, Node *b) {
 }
 
 // Iterative solution.
-void Reverse (Node **head) {
-  if (head == nullptr)
-    return;
+void Reverse (Node **headRef) {
+    if (headRef == nullptr) {
+        return;
+    }
 
-  Node *curr = *head;
-  *head = nullptr;
+    Node* newlist {nullptr};
 
-  while (curr) {
-    Node *nextnode = curr->next;
-    curr->next = *head;
-    *head = curr;
+    while (*headRef) {
+        Node* next = (*headRef)->next;
+        (*headRef)->next = newlist;
+        newlist = *headRef;
+        *headRef = next;
+    }
 
-    curr = nextnode;
-  }
+    *headRef = newlist;
 }
 
 void RecursiveReverseWorker (Node **headRef, Node *node) {
@@ -427,27 +400,6 @@ void RecursiveReverse (Node **headRef) {
   RecursiveReverseWorker (headRef, node);
 }
 
-// Another recursive reverse implementation.
-Node* ReverseWorker (Node **a, Node *node) {
-  if (node->next == nullptr) {
-    *a = node;
-    return node;
-  }
-
-  Node *revnode = ReverseWorker (a, node->next);
-  revnode->next = node;
-
-  return node;
-}
-
-void Reverse (Node **a) {
-  if (a == nullptr || *a == nullptr || (*a)->next == nullptr)
-    return;
-
-  Node *lastnode = ReverseWorker (a, *a);
-  lastnode->next = nullptr;
-}
-
 // ===========================================================
 // Given a linked list, reverse the nodes of a linked list k at a time and return its modified list.
 
@@ -460,31 +412,31 @@ void Reverse (Node **a) {
 // For k = 3, you should return: 3->2->1->4->5
 
 ListNode* reverseKGroup(ListNode* head, int k) {
-	if (head == nullptr)
-		return nullptr;
+	ListNode* curr {head};
+    int count {k};
 
-	ListNode *curr = head;
+    while (curr && count) {
+        curr = curr->next;
+        count--;
+    }
 
-	int i;
-	for (i = 0; i < k && curr; i++) {
-		curr = curr->next;
-	}
+    if (count) {
+        return head;
+    }
 
-	if (curr == nullptr && i < k)
-		return head;
+    ListNode* newnext = reverseKGroup(curr, k);
+    
+    ListNode* newhead {nullptr};
+    ListNode* oldhead {head};
 
-	ListNode *newhead = reverseKGroup (curr, k);
+    while (head != curr) {
+        ListNode* next = head->next;
+        head->next = newhead;
+        newhead = head;
+        head = next;
+    }
 
-	ListNode *node = head->next;
-	head->next = newhead;
+    oldhead->next = newnext;
 
-	for (int i = 1; i < k && node; i++) {
-		ListNode *temp = node;
-		node = node->next;
-
-		temp->next = head;
-		head = temp;
-	}
-
-	return head;
+    return newhead;
 }
