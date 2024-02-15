@@ -16,7 +16,7 @@ using namespace std;
 
 /*
  * In a BST, nodes in left subtree <= parent.
- * Nodes in right subtree >= parent.
+ * Nodes in right subtree > parent.
  */
 
 struct Node {
@@ -33,10 +33,8 @@ void Insert (Node **node, int data) {
   if (newnode == nullptr)
     return;
 
-  Node *curr, *prev;
-
-  curr = *node;
-  prev = nullptr;
+  Node *curr {*node};
+  Node *prev {nullptr};
 
   while (curr) {
     prev = curr;
@@ -74,41 +72,31 @@ void PrintRange (Node *node, int min, int max) {
   }
 }
 
-bool IsBalanced (Node *node) {
-  static int count = 0;
-  static int min = -1, max = -1;
+// Is the tree balanced? Left depth and right depth shouldn't differ by more than 1.
+int IsBalancedWorker(TreeNode* root) {
+	if (root == nullptr) {
+		return 0;
+	}
 
-  if (node == nullptr)
-    return true;
+	int ldepth = IsBalancedWorker(root->left);
+	if (ldepth == -1) {
+		return -1;
+	}
 
-  count++;
+	int rdepth = IsBalancedWorker(root->right);
+	if (rdepth == -1) {
+		return -1;
+	}
 
-  if (node->left == nullptr && node->right == nullptr) {
-    if (min < 0 && max < 0) {
-      min = max = count;
-    }
+	if (abs(ldepth - rdepth) > 1) {
+		return -1;
+	}
 
-    else if (abs(min - count) > 1 || abs (max - count) > 1) {
-      return false;
-    }
+	return max(ldepth, rdepth) + 1;
+}
 
-    else if (count < min) {
-      min = count;
-    }
-
-    else if (count > max) {
-      max = count;
-    }
-  }
-
-  else if (IsBalanced(node->left) == false)
-    return false;
-
-  else if (IsBalanced(node->right) == false)
-    return false;
-
-  count--;
-  return true;
+bool isBalanced(TreeNode* root) {
+	return IsBalancedWorker(root) != -1;
 }
 
 Node* Successor (Node *node) {

@@ -101,12 +101,13 @@ bool OneEditApart (const string& s1, const string& s2) {
       i++; j++;
     }
 
-    else if (sawdiff == true)
-        return false;
+    else if (sawdiff == true) {
+        // We've seen a difference before. If we see a difference
+		// again, then the edit distance exceeds one. Return false.
+		return false;
+	}
 
     else {
-      // We've seen a difference before. If we see a difference
-      // again, then the edit distance exceeds one. Return false.
       sawdiff = true;
 
       // Reason for the below selective increment:
